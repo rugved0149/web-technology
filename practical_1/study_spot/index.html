@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="StudySpot - Find, explore and reserve campus study spaces.">
+    <title>StudySpot | Campus Study Spaces</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="#home">
+            <span class="brand-icon"><i class="bi bi-book-half"></i></span>
+            StudySpot
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link active" href="#home">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#spaces">Spaces</a></li>
+                <li class="nav-item"><a class="nav-link" href="#reservations">My Reservations</a></li>
+                <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+                <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="theme-btn" id="themeToggle" title="Toggle theme">
+                    <i class="bi bi-moon"></i>
+                </button>
+
+                <button class="btn btn-primary-custom"
+                        data-bs-toggle="modal"
+                        data-bs-target="#bookingModal">
+                    Reserve a Spot
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<header id="home" class="hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+
+            <div class="col-lg-7">
+                <span class="eyebrow">CAMPUS STUDY SPACES</span>
+
+                <h1>Find a place where <span>ideas happen.</span></h1>
+
+                <p class="hero-text">
+                    Discover quiet corners, collaborative rooms and open spaces
+                    around campus. Pick a spot and make it yours.
+                </p>
+
+                <div class="hero-search">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="heroSearch"
+                           placeholder="Search study spaces...">
+                    <button onclick="searchFromHero()">Search</button>
+                </div>
+
+                <div class="hero-actions">
+                    <a href="#spaces" class="btn btn-primary-custom btn-lg">
+                        Explore Spaces <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a href="#features" class="btn btn-outline-custom btn-lg">
+                        How it works
+                    </a>
+                </div>
+
+                <div class="stats">
+                    <div>
+                        <strong id="totalSpaces">6</strong>
+                        <span>Study Spots</span>
+                    </div>
+                    <div>
+                        <strong>8</strong>
+                        <span>Campus Areas</span>
+                    </div>
+                    <div>
+                        <strong id="availabilityRate">92%</strong>
+                        <span>Availability</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="availability-card">
+                    <div class="availability-top">
+                        <div>
+                            <span class="small-label">LIVE AVAILABILITY</span>
+                            <h3>Central Library</h3>
+                        </div>
+                        <span class="status-dot">
+                            <span class="live-dot"></span>
+                            <span id="libraryStatus">Open</span>
+                        </span>
+                    </div>
+
+                    <div class="live-time">
+                        <i class="bi bi-clock"></i>
+                        <span id="liveClock">--:--:--</span>
+                    </div>
+
+                    <div class="occupancy">
+                        <div class="occupancy-heading">
+                            <span>Current occupancy</span>
+                            <strong id="libraryOccupancy">68%</strong>
+                        </div>
+
+                        <div class="progress">
+                            <div id="libraryProgress"
+                                 class="progress-bar"
+                                 style="width:68%"></div>
+                        </div>
+                    </div>
+
+                    <div class="availability-info">
+                        <div>
+                            <i class="bi bi-people"></i>
+                            <span id="librarySeats">42 seats occupied</span>
+                        </div>
+                        <div>
+                            <i class="bi bi-clock"></i>
+                            <span>Open until 10 PM</span>
+                        </div>
+                    </div>
+
+                    <button class="btn availability-btn"
+                            onclick="openBooking('Central Library')">
+                        Reserve this space
+                        <i class="bi bi-arrow-up-right"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</header>
+
+
+<section id="spaces" class="spaces-section">
+    <div class="container">
+
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">CHOOSE YOUR SPACE</span>
+                <h2>Study your way.</h2>
+            </div>
+
+            <p>
+                Find an environment that matches your study style,
+                availability and preferred facilities.
+            </p>
+        </div>
+
+        <div class="space-controls">
+
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="spaceSearch"
+                       placeholder="Search by name or facility..."
+                       oninput="filterSpaces()">
+            </div>
+
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterCategory('all', this)">
+                    All
+                </button>
+                <button class="filter-btn" onclick="filterCategory('quiet', this)">
+                    Quiet
+                </button>
+                <button class="filter-btn" onclick="filterCategory('collab', this)">
+                    Collaborative
+                </button>
+                <button class="filter-btn" onclick="filterCategory('outdoor', this)">
+                    Outdoor
+                </button>
+            </div>
+
+        </div>
+
+        <div id="spaceContainer" class="row g-4"></div>
+
+        <div id="noSpaces" class="no-results d-none">
+            <i class="bi bi-search"></i>
+            <h3>No spaces found</h3>
+            <p>Try another search or category.</p>
+        </div>
+
+    </div>
+</section>
+
+
+<section id="reservations" class="reservations-section">
+    <div class="container">
+
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">YOUR ACTIVITY</span>
+                <h2>My reservations.</h2>
+            </div>
+
+            <div class="activity-stats">
+                <div>
+                    <strong id="reservationCount">0</strong>
+                    <span>Bookings</span>
+                </div>
+                <div>
+                    <strong id="studyHours">0</strong>
+                    <span>Study Hours</span>
+                </div>
+                <div>
+                    <strong id="favoriteCount">0</strong>
+                    <span>Favorites</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="reservationContainer" class="reservation-grid">
+            <div class="empty-state">
+                <i class="bi bi-calendar2-x"></i>
+                <h3>No reservations yet</h3>
+                <p>Your upcoming study sessions will appear here.</p>
+                <button class="btn btn-primary-custom"
+                        data-bs-toggle="modal"
+                        data-bs-target="#bookingModal">
+                    Make a Reservation
+                </button>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<section id="features" class="features-section">
+    <div class="container">
+
+        <div class="row align-items-center g-5">
+
+            <div class="col-lg-5">
+                <span class="eyebrow">WHY STUDYSPOT</span>
+
+                <h2>Less searching.<br>More studying.</h2>
+
+                <p>
+                    StudySpot makes it easier to find suitable places on
+                    campus without walking around looking for an empty seat.
+                </p>
+
+                <a href="#faq" class="text-link">
+                    Learn more <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="row g-3">
+
+                    <div class="col-sm-6">
+                        <div class="feature-box">
+                            <i class="bi bi-compass"></i>
+                            <h4>Discover</h4>
+                            <p>Browse spaces based on your preferred environment.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="feature-box">
+                            <i class="bi bi-bar-chart"></i>
+                            <h4>Live occupancy</h4>
+                            <p>Check current availability before heading there.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="feature-box">
+                            <i class="bi bi-calendar-check"></i>
+                            <h4>Reserve</h4>
+                            <p>Book a suitable space for your study session.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <div class="feature-box">
+                            <i class="bi bi-heart"></i>
+                            <h4>Favorites</h4>
+                            <p>Save your preferred study spaces for quick access.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<section class="process-section">
+    <div class="container">
+
+        <div class="section-heading centered">
+            <span class="eyebrow">SIMPLE PROCESS</span>
+            <h2>Three steps. That's it.</h2>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="process-card">
+                    <span>01</span>
+                    <i class="bi bi-search"></i>
+                    <h3>Choose</h3>
+                    <p>Find a study environment that matches your needs.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="process-card">
+                    <span>02</span>
+                    <i class="bi bi-calendar2-check"></i>
+                    <h3>Reserve</h3>
+                    <p>Select your preferred date and duration.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="process-card">
+                    <span>03</span>
+                    <i class="bi bi-lightbulb"></i>
+                    <h3>Study</h3>
+                    <p>Show up, settle in and focus on what matters.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<section id="faq" class="faq-section">
+    <div class="container">
+
+        <div class="section-heading centered">
+            <span class="eyebrow">FAQ</span>
+            <h2>Frequently asked questions.</h2>
+        </div>
+
+        <div class="accordion" id="faqAccordion">
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#faqOne">
+                        Can I reserve a study space in advance?
+                    </button>
+                </h2>
+
+                <div id="faqOne"
+                     class="accordion-collapse collapse show"
+                     data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        Yes. Select a space, choose a date and duration,
+                        and submit the reservation form.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#faqTwo">
+                        Can I save my favorite spaces?
+                    </button>
+                </h2>
+
+                <div id="faqTwo"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        Yes. Use the heart button on a space to add or
+                        remove it from your favorites.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#faqThree">
+                        Does StudySpot remember my reservations?
+                    </button>
+                </h2>
+
+                <div id="faqThree"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        Reservations are stored locally in the browser using
+                        localStorage for this front-end demonstration.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#faqFour">
+                        Does StudySpot work on mobile?
+                    </button>
+                </h2>
+
+                <div id="faqFour"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        Yes. Bootstrap's responsive grid and utilities allow
+                        the interface to adapt to desktop, tablet and mobile.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<footer>
+    <div class="container">
+
+        <div class="row g-4">
+
+            <div class="col-lg-5">
+                <a class="footer-brand" href="#home">
+                    <span class="brand-icon">
+                        <i class="bi bi-book-half"></i>
+                    </span>
+                    StudySpot
+                </a>
+
+                <p>
+                    A campus study-space discovery and reservation concept.
+                </p>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h5>Explore</h5>
+                <a href="#spaces">Spaces</a>
+                <a href="#reservations">Reservations</a>
+                <a href="#features">Features</a>
+                <a href="#faq">FAQ</a>
+            </div>
+
+            <div class="col-6 col-lg-2">
+                <h5>Project</h5>
+                <a href="#home">About</a>
+                <a href="#features">How it works</a>
+                <a href="#faq">Help</a>
+            </div>
+
+            <div class="col-lg-3">
+                <h5>Built with</h5>
+                <p>HTML5 · CSS3 · Bootstrap · JavaScript</p>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <span>Web Technology · Practical 1</span>
+            <span>© 2026 StudySpot</span>
+        </div>
+
+    </div>
+</footer>
+
+
+<div class="modal fade" id="bookingModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <span class="eyebrow">RESERVE A SPACE</span>
+                    <h2 class="modal-title">Plan your session</h2>
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="bookingForm">
+
+                    <div class="mb-3">
+                        <label for="studentName" class="form-label">
+                            Your name
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               id="studentName"
+                               placeholder="Enter your name"
+                               required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="spaceSelect" class="form-label">
+                            Study space
+                        </label>
+
+                        <select class="form-select"
+                                id="spaceSelect"
+                                required>
+                            <option value="">Select a space</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-sm-6">
+                            <label for="bookingDate" class="form-label">
+                                Date
+                            </label>
+
+                            <input type="date"
+                                   class="form-control"
+                                   id="bookingDate"
+                                   required>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label for="duration" class="form-label">
+                                Duration
+                            </label>
+
+                            <select class="form-select"
+                                    id="duration"
+                                    required>
+                                <option value="">Select</option>
+                                <option value="1">1 hour</option>
+                                <option value="2">2 hours</option>
+                                <option value="3">3 hours</option>
+                                <option value="4">4 hours</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="booking-preview" id="bookingPreview">
+                        <i class="bi bi-info-circle"></i>
+                        Select your details to see a summary.
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary-custom w-100 mt-4">
+                        Confirm Reservation
+                    </button>
+
+                </form>
+
+                <div id="bookingSuccess"
+                     class="success-message d-none">
+
+                    <div class="success-icon">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+
+                    <h3>Reservation confirmed</h3>
+
+                    <p id="successText">
+                        Your study space has been reserved successfully.
+                    </p>
+
+                    <button class="btn btn-outline-custom"
+                            data-bs-dismiss="modal">
+                        Done
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <div>
+                    <span class="eyebrow">SPACE DETAILS</span>
+                    <h2 class="modal-title" id="detailsTitle"></h2>
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="detailsContent"></div>
+
+                <button class="btn btn-primary-custom w-100 mt-4"
+                        id="detailsReserveBtn">
+                    Reserve this space
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="appToast"
+         class="toast"
+         role="alert">
+
+        <div class="toast-header">
+            <span class="toast-icon">
+                <i class="bi bi-check-circle"></i>
+            </span>
+
+            <strong class="me-auto">StudySpot</strong>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="toast"></button>
+        </div>
+
+        <div class="toast-body" id="toastMessage">
+            Action completed.
+        </div>
+
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+
+</body>
+</html>
