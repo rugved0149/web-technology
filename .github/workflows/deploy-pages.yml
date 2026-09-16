@@ -1,4 +1,4 @@
-name: Deploy StudySpot
+name: Deploy Web Technology
 
 on:
   push:
@@ -29,9 +29,108 @@ jobs:
       - name: Prepare website
         run: |
           mkdir public
-          cp practical_1/study_spot/index.html public/
-          cp -r practical_1/study_spot/css public/
-          cp -r practical_1/study_spot/js public/
+          cp -r practical_1 public/
+          cp -r practical_2 public/
+
+      - name: Create index
+        run: |
+          cat > public/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Web Technology Practicals</title>
+              <style>
+                  body {
+                      margin: 0;
+                      min-height: 100vh;
+                      display: grid;
+                      place-items: center;
+                      font-family: Arial, sans-serif;
+                      background: #f5f5f2;
+                      color: #17191c;
+                  }
+
+                  main {
+                      width: min(900px, 90%);
+                      text-align: center;
+                  }
+
+                  h1 {
+                      font-size: 3rem;
+                      margin-bottom: 10px;
+                  }
+
+                  p {
+                      color: #70747a;
+                  }
+
+                  .grid {
+                      display: grid;
+                      grid-template-columns: repeat(2, 1fr);
+                      gap: 20px;
+                      margin-top: 40px;
+                  }
+
+                  a {
+                      display: block;
+                      padding: 35px;
+                      border: 1px solid #ddd;
+                      border-radius: 15px;
+                      background: white;
+                      color: inherit;
+                      text-decoration: none;
+                      transition: 0.2s;
+                  }
+
+                  a:hover {
+                      transform: translateY(-5px);
+                      box-shadow: 0 15px 35px rgba(0,0,0,.08);
+                  }
+
+                  strong {
+                      display: block;
+                      font-size: 1.2rem;
+                      margin-bottom: 8px;
+                  }
+
+                  @media (max-width: 600px) {
+                      .grid {
+                          grid-template-columns: 1fr;
+                      }
+
+                      h1 {
+                          font-size: 2.2rem;
+                      }
+                  }
+              </style>
+          </head>
+
+          <body>
+
+          <main>
+              <h1>Web Technology</h1>
+              <p>Practical Projects</p>
+
+              <div class="grid">
+
+                  <a href="practical_1/study_spot/">
+                      <strong>Practical 1</strong>
+                      StudySpot
+                  </a>
+
+                  <a href="practical_2/event_vault/">
+                      <strong>Practical 2</strong>
+                      EventVault
+                  </a>
+
+              </div>
+          </main>
+
+          </body>
+          </html>
+          EOF
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
