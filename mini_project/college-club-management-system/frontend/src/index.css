@@ -1,0 +1,167 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #172033;
+  background: #f6f8fc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #f6f8fc;
+}
+
+a {
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+.hero-section {
+  background:
+    radial-gradient(circle at 85% 20%, rgba(13, 110, 253, 0.1), transparent 30%),
+    linear-gradient(135deg, #f8f9fa 0%, #eef2f7 100%);
+}
+
+.min-vh-75 {
+  min-height: 75vh;
+}
+
+.hero-panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  padding: 2rem;
+}
+
+.activity-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid #e9ecef;
+}
+
+.activity-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.activity-row strong {
+  font-size: 1.75rem;
+}
+
+.activity-row span {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.activity-note {
+  border-radius: 14px;
+  background: #f8f9fa;
+  padding: 1rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.club-card,
+.event-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.club-card:hover,
+.event-card:hover {
+  transform: translateY(-4px);
+}
+
+.club-banner {
+  height: 8px;
+}
+
+@media (max-width: 767px) {
+  .hero-section h1 {
+    font-size: 2.5rem;
+  }
+
+  .activity-row {
+    grid-template-columns: 1fr;
+  }
+}
+.club-detail-header {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.club-detail-banner {
+  height: 12px;
+}
+
+.stat-box {
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-box strong {
+  font-size: 1.5rem;
+}
+
+.stat-box span {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.detail-box {
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.detail-box span {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.auth-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  padding: 4rem 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(13, 110, 253, 0.08), transparent 30%),
+    #f6f8fc;
+}
+
+.form-control,
+.form-select {
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+}
+
+.btn {
+  border-radius: 10px;
+}
+
+.card {
+  border-radius: 18px;
+  overflow: hidden;
+}
