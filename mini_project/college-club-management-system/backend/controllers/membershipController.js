@@ -46,11 +46,13 @@ const requestMembership = async (req, res) => {
       membership,
     });
   } catch (error) {
+    console.error("Membership request error:", error);
+
     res.status(500).json({
-      success: false,
-      message: "Unable to submit membership request",
+        success: false,
+        message: "Unable to submit membership request",
     });
-  }
+    }
 };
 
 const getMyMemberships = async (req, res) => {

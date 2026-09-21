@@ -1,135 +1,258 @@
-import { Link, useParams } from "react-router-dom";
-import { clubs, events } from "../utils/mockData";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { getClubById, getMyMemberships, requestMembership } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
-function ClubDetails() {
+const ClubDetails = () => {
   const { id } = useParams();
-  const club = clubs.find((item) => item.id === Number(id));
+  const navigate = useNavigate();
+  const { user, token, isAuthenticated } = useAuth();
 
-  if (!club) {
+  const [club, setClub] = useState(null);
+  const [membership, setMembership] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [joining, setJoining] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const loadClub = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await getClubById(id);
+        setClub(data.club);
+
+        if (isAuthenticated && user?.role === "student") {
+          try {
+            const membershipData = await getMyMemberships(token);
+
+            const currentMembership = membershipData.memberships.find(
+              (item) => item.club?._id === id
+            );
+
+            setMembership(currentMembership || null);
+          } catch {
+            setMembership(null);
+          }
+        }
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClub();
+  }, [id, token, user, isAuthenticated]);
+
+  const handleJoin = async () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    if (user?.role !== "student") {
+      setError("Only students can request club membership.");
+      return;
+    }
+
+    try {
+      setJoining(true);
+      setError("");
+      setMessage("");
+
+      const data = await requestMembership(token, id);
+
+      setMembership(data.membership);
+      setMessage(data.message);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setJoining(false);
+    }
+  };
+
+  if (loading) {
     return (
       <div className="container py-5 text-center">
-        <h3>Club not found</h3>
-        <p className="text-secondary">
-          The club you're looking for does not exist.
-        </p>
-        <Link to="/clubs" className="btn btn-dark">
+        <div className="spinner-border text-primary" />
+        <p className="text-muted mt-3">Loading club...</p>
+      </div>
+    );
+  }
+
+  if (error && !club) {
+    return (
+      <div className="container py-5">
+        <div className="alert alert-danger">{error}</div>
+        <Link to="/clubs" className="btn btn-outline-primary">
           Back to Clubs
         </Link>
       </div>
     );
   }
 
-  const clubEvents = events.filter((event) => event.club === club.name);
+  if (!club) {
+    return (
+      <div className="container py-5 text-center">
+        <h3>Club not found</h3>
+        <Link to="/clubs" className="btn btn-primary mt-3">
+          Back to Clubs
+        </Link>
+      </div>
+    );
+  }
+
+  const getMembershipText = () => {
+    if (!membership) return "Join Club";
+
+    if (membership.status === "pending") {
+      return "Request Pending";
+    }
+
+    if (membership.status === "active") {
+      return "Member";
+    }
+
+    if (membership.status === "rejected") {
+      return "Request Again";
+    }
+
+    if (membership.status === "suspended") {
+      return "Membership Suspended";
+    }
+
+    if (membership.status === "left") {
+      return "Join Again";
+    }
+
+    return "Join Club";
+  };
+
+  const canJoin =
+    !membership ||
+    membership.status === "rejected" ||
+    membership.status === "left";
 
   return (
-    <div className="container py-5">
-      <Link to="/clubs" className="text-dark small">
-        ← Back to clubs
-      </Link>
+    <div>
+      <section className="page-header py-5">
+        <div className="container">
+          <Link
+            to="/clubs"
+            className="text-decoration-none d-inline-block mb-4"
+          >
+            ← Back to Clubs
+          </Link>
 
-      <section className="club-detail-header mt-4">
-        <div className={`club-detail-banner bg-${club.color}`}></div>
-
-        <div className="p-4 p-lg-5">
-          <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
+          <div className="d-flex flex-column flex-md-row justify-content-between gap-4">
             <div>
-              <span className="badge text-bg-light mb-3">
+              <span className="badge bg-primary-subtle text-primary mb-3">
                 {club.category}
               </span>
 
-              <h1 className="fw-bold mb-3">{club.name}</h1>
+              <h1 className="display-5 fw-bold mb-3">
+                {club.name}
+              </h1>
 
-              <p className="text-secondary mb-0">
+              <p className="lead text-muted mb-0">
                 {club.description}
               </p>
             </div>
 
-            <Link to="/login" className="btn btn-dark px-4">
-              Join Club
-            </Link>
-          </div>
-
-          <div className="row g-3 mt-4">
-            <div className="col-sm-4">
-              <div className="stat-box">
-                <strong>{club.members}</strong>
-                <span>Members</span>
-              </div>
-            </div>
-
-            <div className="col-sm-4">
-              <div className="stat-box">
-                <strong>{club.events}</strong>
-                <span>Events</span>
-              </div>
-            </div>
-
-            <div className="col-sm-4">
-              <div className="stat-box">
-                <strong>Active</strong>
-                <span>Club Status</span>
-              </div>
+            <div className="d-flex align-items-start">
+              {canJoin ? (
+                <button
+                  className="btn btn-primary btn-lg"
+                  onClick={handleJoin}
+                  disabled={joining}
+                >
+                  {joining ? "Requesting..." : getMembershipText()}
+                </button>
+              ) : (
+                <button
+                  className="btn btn-outline-secondary btn-lg"
+                  disabled
+                >
+                  {getMembershipText()}
+                </button>
+              )}
             </div>
           </div>
         </div>
       </section>
 
       <section className="py-5">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h3 className="fw-bold mb-1">Upcoming Events</h3>
-            <p className="text-secondary mb-0">
-              Activities organized by this club.
-            </p>
-          </div>
-        </div>
+        <div className="container">
+          {error && (
+            <div className="alert alert-danger">
+              {error}
+            </div>
+          )}
 
-        {clubEvents.length > 0 ? (
+          {message && (
+            <div className="alert alert-success">
+              {message}
+            </div>
+          )}
+
           <div className="row g-4">
-            {clubEvents.map((event) => (
-              <div className="col-md-6 col-lg-4" key={event.id}>
-                <div className="card border-0 shadow-sm h-100">
-                  <div className="card-body p-4">
-                    <span className="badge text-bg-light mb-3">
-                      {event.category}
-                    </span>
+            <div className="col-md-4">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body p-4">
+                  <h5 className="fw-bold">Club Information</h5>
 
-                    <h5 className="fw-bold">{event.title}</h5>
-
-                    <p className="text-secondary small">
-                      {event.description}
+                  <div className="mt-4">
+                    <p className="mb-2">
+                      <strong>Category:</strong>{" "}
+                      {club.category}
                     </p>
 
-                    <div className="small mb-2">
-                      <strong>Date:</strong> {event.date}
-                    </div>
+                    <p className="mb-2">
+                      <strong>Status:</strong>{" "}
+                      <span className="text-success">
+                        {club.status}
+                      </span>
+                    </p>
 
-                    <div className="small mb-3">
-                      <strong>Venue:</strong> {event.venue}
-                    </div>
+                    {club.facultyCoordinator && (
+                      <p className="mb-2">
+                        <strong>Faculty Coordinator:</strong>{" "}
+                        {club.facultyCoordinator.name}
+                      </p>
+                    )}
 
-                    <Link
-                      to={`/events/${event.id}`}
-                      className="btn btn-outline-dark btn-sm"
-                    >
-                      View Event
-                    </Link>
+                    {club.studentCoordinator && (
+                      <p className="mb-0">
+                        <strong>Student Coordinator:</strong>{" "}
+                        {club.studentCoordinator.name}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+
+            <div className="col-md-8">
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-body p-4">
+                  <h5 className="fw-bold mb-3">
+                    About the Club
+                  </h5>
+
+                  <p className="text-muted mb-0">
+                    {club.description}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="bg-light rounded-4 p-5 text-center">
-            <h5>No upcoming events</h5>
-            <p className="text-secondary mb-0">
-              This club has no upcoming events at the moment.
-            </p>
-          </div>
-        )}
+        </div>
       </section>
     </div>
   );
-}
+};
 
 export default ClubDetails;

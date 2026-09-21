@@ -1,49 +1,57 @@
 import { Link } from "react-router-dom";
 
-function EventCard({ event }) {
-  const seatsLeft = event.capacity - event.registered;
+const EventCard = ({ event }) => {
+  const eventDate = new Date(event.date);
 
   return (
     <div className="card h-100 border-0 shadow-sm event-card">
       <div className="card-body p-4">
         <div className="d-flex justify-content-between align-items-start mb-3">
-          <span className="badge text-bg-light">{event.category}</span>
-          <span className="small text-secondary">{event.club}</span>
+          <span className="badge bg-primary-subtle text-primary">
+            {event.category}
+          </span>
+
+          <span className="badge bg-success-subtle text-success">
+            {event.status.replaceAll("_", " ")}
+          </span>
         </div>
 
-        <h5 className="fw-bold">{event.title}</h5>
+        <h4 className="fw-bold mb-2">{event.title}</h4>
 
-        <p className="text-secondary small">
+        <p className="text-muted mb-3">
           {event.description}
         </p>
 
-        <div className="small mb-2">
-          <strong>Date:</strong> {event.date}
+        <div className="small text-muted mb-3">
+          <div className="mb-1">
+            <strong>Date:</strong>{" "}
+            {eventDate.toLocaleDateString()}
+          </div>
+
+          <div className="mb-1">
+            <strong>Time:</strong> {event.time}
+          </div>
+
+          <div className="mb-1">
+            <strong>Venue:</strong> {event.venue}
+          </div>
+
+          {event.club && (
+            <div>
+              <strong>Club:</strong> {event.club.name}
+            </div>
+          )}
         </div>
 
-        <div className="small mb-2">
-          <strong>Time:</strong> {event.time}
-        </div>
-
-        <div className="small mb-3">
-          <strong>Venue:</strong> {event.venue}
-        </div>
-
-        <div className="d-flex justify-content-between align-items-center">
-          <span className="small text-secondary">
-            {seatsLeft} seats left
-          </span>
-
-          <Link
-            to={`/events/${event.id}`}
-            className="btn btn-dark btn-sm px-3"
-          >
-            View Event
-          </Link>
-        </div>
+        <Link
+          to={`/events/${event._id}`}
+          className="btn btn-outline-primary w-100"
+        >
+          View Event
+        </Link>
       </div>
     </div>
   );
-}
+};
 
 export default EventCard;

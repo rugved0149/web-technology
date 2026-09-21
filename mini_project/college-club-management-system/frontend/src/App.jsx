@@ -8,7 +8,7 @@ import EventDetails from "./pages/EventDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
-
+import Announcements from "./pages/Announcements";
 function App() {
   return (
     <BrowserRouter>
@@ -22,6 +22,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="/announcements" element={<Announcements />} />
         </Route>
       </Routes>
     </BrowserRouter>
