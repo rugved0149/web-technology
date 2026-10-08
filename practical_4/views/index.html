@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CampusPass | Registration</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <a href="/" class="brand">
+        <span class="brand-mark">C</span>
+        <span>CampusPass</span>
+    </a>
+
+    <div class="nav-links">
+        <a href="/" class="active">Home</a>
+        <a href="#events">Events</a>
+        <a href="#register">Register</a>
+        <a href="/profile">Profile</a>
+    </div>
+
+    <a href="/profile" class="profile-mini">
+        <span>RS</span>
+        <strong>Student</strong>
+    </a>
+
+</nav>
+
+<main>
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <span class="eyebrow">CAMPUS EVENT PLATFORM</span>
+
+            <h1>
+                Your campus.
+                <br>
+                <span>Your next experience.</span>
+            </h1>
+
+            <p>
+                Discover student events, technical competitions and
+                campus experiences. Register through a secure
+                Node.js server-side validation system.
+            </p>
+
+            <div class="hero-actions">
+                <a href="#register" class="button">
+                    Register for an Event
+                    <span>→</span>
+                </a>
+
+                <a href="/profile" class="secondary-button">
+                    View Profile
+                </a>
+            </div>
+
+        </div>
+
+        <div class="hero-panel">
+
+            <span class="panel-label">SYSTEM STATUS</span>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                Server Online
+            </div>
+
+            <div class="system-info">
+                <div>
+                    <span>Runtime</span>
+                    <strong>Node.js</strong>
+                </div>
+
+                <div>
+                    <span>Framework</span>
+                    <strong>Express</strong>
+                </div>
+
+                <div>
+                    <span>Validation</span>
+                    <strong>Server-side</strong>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="events-section" id="events">
+
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">UPCOMING</span>
+                <h2>Explore events</h2>
+            </div>
+
+            <span class="section-count">04 EVENTS</span>
+        </div>
+
+        <div class="event-grid">
+
+            <article class="event-card">
+                <span class="event-number">01</span>
+                <h3>Tech Innovation Fest</h3>
+                <p>Explore emerging technologies and student innovation.</p>
+                <span class="event-tag">TECHNOLOGY</span>
+            </article>
+
+            <article class="event-card">
+                <span class="event-number">02</span>
+                <h3>Campus Hackathon</h3>
+                <p>Build practical solutions to real-world problems.</p>
+                <span class="event-tag">CODING</span>
+            </article>
+
+            <article class="event-card">
+                <span class="event-number">03</span>
+                <h3>Cyber Security Summit</h3>
+                <p>Learn about security, threats and modern defense.</p>
+                <span class="event-tag">SECURITY</span>
+            </article>
+
+            <article class="event-card">
+                <span class="event-number">04</span>
+                <h3>Code Arena</h3>
+                <p>Test your programming skills against other students.</p>
+                <span class="event-tag">PROGRAMMING</span>
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <section class="form-section-wrapper" id="register">
+
+        <div class="form-card">
+
+            <div class="form-header">
+
+                <div>
+                    <span class="step">01</span>
+                    <h2>Event Registration</h2>
+                    <p>Enter your details below. The server will validate every field.</p>
+                </div>
+
+                <span class="required-note">* Required</span>
+
+            </div>
+
+            <form action="/register" method="POST" id="registrationForm">
+
+                <div class="form-section">
+
+                    <h3>Personal Information</h3>
+
+                    <div class="form-grid">
+
+                        <div class="field full">
+                            <label for="fullName">
+                                Full Name <span>*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="fullName"
+                                name="fullName"
+                                placeholder="e.g. Rugved Suryawanshi"
+                                autocomplete="name"
+                                required
+                            >
+
+                            <small class="field-message" id="nameMessage"></small>
+                        </div>
+
+                        <div class="field">
+
+                            <label for="email">
+                                Email Address <span>*</span>
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="you@example.com"
+                                autocomplete="email"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="field">
+
+                            <label for="phone">
+                                Mobile Number <span>*</span>
+                            </label>
+
+                            <input
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                placeholder="10-digit mobile number"
+                                maxlength="10"
+                                inputmode="numeric"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="field full">
+
+                            <label for="college">
+                                College / Institution <span>*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="college"
+                                name="college"
+                                placeholder="Enter your college or institution"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="field">
+
+                            <label for="year">
+                                Academic Year <span>*</span>
+                            </label>
+
+                            <select id="year" name="year" required>
+
+                                <option value="">Select year</option>
+                                <option value="1">First Year</option>
+                                <option value="2">Second Year</option>
+                                <option value="3">Third Year</option>
+                                <option value="4">Fourth Year</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="field">
+
+                            <label for="event">
+                                Event <span>*</span>
+                            </label>
+
+                            <select id="event" name="event" required>
+
+                                <option value="">Select event</option>
+                                <option value="tech-fest">Tech Innovation Fest</option>
+                                <option value="hackathon">Campus Hackathon</option>
+                                <option value="cyber-summit">Cyber Security Summit</option>
+                                <option value="code-arena">Code Arena</option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-section">
+
+                    <h3>Account Security</h3>
+
+                    <div class="form-grid">
+
+                        <div class="field">
+
+                            <label for="password">
+                                Password <span>*</span>
+                            </label>
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Minimum 8 characters"
+                                autocomplete="new-password"
+                                required
+                            >
+
+                            <div class="password-meter">
+                                <span id="passwordStrength"></span>
+                            </div>
+
+                            <small class="field-message" id="passwordMessage">
+                                Use at least 8 characters, including a letter and number.
+                            </small>
+
+                        </div>
+
+                        <div class="field">
+
+                            <label for="confirmPassword">
+                                Confirm Password <span>*</span>
+                            </label>
+
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                placeholder="Re-enter password"
+                                autocomplete="new-password"
+                                required
+                            >
+
+                            <small class="field-message" id="confirmMessage"></small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <label class="checkbox-row">
+
+                    <input
+                        type="checkbox"
+                        name="terms"
+                        value="accepted"
+                        required
+                    >
+
+                    <span>
+                        I confirm that the information provided is accurate
+                        and agree to the event registration terms.
+                    </span>
+
+                </label>
+
+
+                <div class="form-footer">
+
+                    <p>
+                        Validation is performed on the Node.js server.
+                    </p>
+
+                    <button type="submit" class="button" id="submitButton">
+                        Submit Registration
+                        <span>→</span>
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <span>CampusPass · Web Technology Practical 4</span>
+
+    <span>
+        Node.js · Express · Server-Side Validation
+    </span>
+
+</footer>
+
+
+<script src="/js/script.js"></script>
+
+</body>
+</html>
