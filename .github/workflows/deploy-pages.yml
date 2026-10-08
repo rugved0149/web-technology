@@ -41,7 +41,12 @@ jobs:
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>Web Technology Practicals</title>
+
               <style>
+                  * {
+                      box-sizing: border-box;
+                  }
+
                   body {
                       margin: 0;
                       min-height: 100vh;
@@ -53,7 +58,7 @@ jobs:
                   }
 
                   main {
-                      width: min(900px, 90%);
+                      width: min(1100px, 90%);
                       text-align: center;
                   }
 
@@ -64,6 +69,7 @@ jobs:
 
                   p {
                       color: #70747a;
+                      font-size: 1.1rem;
                   }
 
                   .grid {
@@ -91,13 +97,28 @@ jobs:
 
                   strong {
                       display: block;
-                      font-size: 1.2rem;
+                      font-size: 1.25rem;
                       margin-bottom: 8px;
+                  }
+
+                  span {
+                      display: block;
+                      margin-top: 8px;
+                      color: #70747a;
+                      font-size: 0.95rem;
+                  }
+
+                  .node {
+                      grid-column: 1 / -1;
                   }
 
                   @media (max-width: 600px) {
                       .grid {
                           grid-template-columns: 1fr;
+                      }
+
+                      .node {
+                          grid-column: auto;
                       }
 
                       h1 {
@@ -108,26 +129,35 @@ jobs:
           </head>
 
           <body>
+              <main>
+                  <h1>Web Technology</h1>
+                  <p>Practical Projects</p>
 
-          <main>
-              <h1>Web Technology</h1>
-              <p>Practical Projects</p>
+                  <div class="grid">
 
-              <div class="grid">
+                      <a href="practical_1/study_spot/">
+                          <strong>Practical 1</strong>
+                          StudySpot
+                          <span>HTML · CSS · Bootstrap</span>
+                      </a>
 
-                  <a href="practical_1/study_spot/">
-                      <strong>Practical 1</strong>
-                      StudySpot
-                  </a>
+                      <a href="practical_2/event_vault/">
+                          <strong>Practical 2</strong>
+                          EventVault
+                          <span>JavaScript · DOM · JSON</span>
+                      </a>
 
-                  <a href="practical_2/event_vault/">
-                      <strong>Practical 2</strong>
-                      EventVault
-                  </a>
+                      <a class="node"
+                         href="https://web-technology-gfjk.onrender.com/"
+                         target="_blank"
+                         rel="noopener noreferrer">
+                          <strong>Practical 4</strong>
+                          CampusPass
+                          <span>Node.js · Express · Server-side Validation</span>
+                      </a>
 
-              </div>
-          </main>
-
+                  </div>
+              </main>
           </body>
           </html>
           EOF
