@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#132337">
+  <meta name="description" content="Campus FixDesk — report, track, and resolve campus maintenance complaints.">
+  <title>Campus FixDesk | Campus Support Hub</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <section id="authScreen" class="auth-shell">
+    <div class="auth-story">
+      <a class="brand brand-light" href="/" aria-label="Campus FixDesk"><span class="brand-mark">F<span>.</span></span><span class="brand-copy"><strong>fixdesk</strong><small>CAMPUS OPERATIONS</small></span></a>
+      <div class="story-content">
+        <div class="eyebrow"><span></span> CAMPUS SUPPORT HUB</div>
+        <h1>Better spaces<br>start with <em>you.</em></h1>
+        <p>One place to report campus issues, follow every update, and keep learning spaces running smoothly.</p>
+        <div class="story-points"><div><span>✓</span><div><strong>Report with context</strong><small>Describe the issue and attach a photo or location.</small></div></div><div><span>↗</span><div><strong>Track every update</strong><small>Follow complaint status and staff replies.</small></div></div><div><span>⌘</span><div><strong>Two clear roles</strong><small>Students report. Administrators coordinate the fix.</small></div></div></div>
+      </div>
+      <div class="story-foot">CAMPUS CARE <span>·</span> ONE TICKET AT A TIME</div>
+      <div class="story-decoration"></div>
+    </div>
+    <div class="auth-side">
+      <div class="auth-mobile-brand"><span class="brand-mark">F<span>.</span></span><strong>fixdesk</strong></div>
+      <div class="auth-card">
+        <div class="auth-kicker">WELCOME TO FIXDESK</div>
+        <h2 id="authTitle">Sign in to your workspace</h2>
+        <p id="authSubtitle">Choose your role and continue to campus support.</p>
+        <div class="role-toggle" aria-label="Choose account role"><button class="role-option selected" type="button" data-role="student"><span>♙</span> Student</button><button class="role-option" type="button" data-role="admin"><span>▣</span> Admin</button></div>
+        <div class="auth-modes"><button type="button" class="mode-button selected" data-mode="login">Sign in</button><button type="button" class="mode-button" data-mode="register" id="registerModeButton">Create student account</button></div>
+        <div id="authAlert" class="auth-alert" role="alert" hidden></div>
+        <form id="authForm" novalidate>
+          <div class="field" id="authNameWrap" hidden><label for="authName">Full name <b>*</b></label><input id="authName" name="name" maxlength="70" autocomplete="name" placeholder="e.g. Ananya Deshmukh"><small class="field-error" data-auth-error="name"></small></div>
+          <div class="field"><label for="authEmail">Email address <b>*</b></label><input id="authEmail" name="email" type="email" maxlength="254" autocomplete="username" placeholder="you@college.edu"><small class="field-error" data-auth-error="email"></small></div>
+          <div class="field"><div class="label-row"><label for="authPassword">Password <b>*</b></label><span id="passwordHint">Your account password</span></div><div class="password-wrap"><input id="authPassword" name="password" type="password" maxlength="72" autocomplete="current-password" placeholder="Enter your password"><button type="button" id="togglePassword" aria-label="Show password">Show</button></div><small class="field-error" data-auth-error="password"></small><small id="registerPasswordHint" class="field-hint" hidden>At least 8 characters, including uppercase, lowercase and a number.</small></div>
+          <button class="auth-submit" type="submit" id="authSubmit">Sign in <span>↗</span></button>
+        </form>
+        <div class="auth-security"><span>✓</span> Role permissions are checked by the Express server.</div>
+        <p id="authFootnote" class="auth-footnote">Students can create an account. Admin accounts are managed by the campus.</p>
+      </div>
+      <div class="auth-bottom">CAMPUS FIXDESK <span>·</span> PRACTICAL 5</div>
+    </div>
+  </section>
+
+  <div id="appScreen" class="app-shell" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="#dashboard" aria-label="Campus FixDesk home"><span class="brand-mark">F<span>.</span></span><span class="brand-copy"><strong>fixdesk</strong><small>CAMPUS OPERATIONS</small></span></a>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="navigation" aria-label="Main navigation">
+        <a class="nav-link active" href="#dashboard" data-nav="dashboard"><span class="nav-symbol">▦</span> Overview</a>
+        <a class="nav-link" href="#complaints" data-nav="complaints"><span class="nav-symbol">▤</span><span id="complaintNavText">My complaints</span><span class="nav-count" id="navCount">0</span></a>
+        <a class="nav-link" href="#newComplaint" data-nav="newComplaint" id="reportNav"><span class="nav-symbol">＋</span> Report an issue</a>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="side-help"><div class="help-symbol">↗</div><strong>Small fixes. Better days.</strong><p>Help keep shared campus spaces ready for everyone.</p><a href="#newComplaint" id="sideCreateLink">Create a ticket <span>→</span></a></div>
+      <div class="sidebar-foot"><span class="api-dot" id="sidebarApiDot"></span><span id="sidebarApiText">Checking service…</span></div>
+      <div class="sidebar-profile"><span class="user-avatar" id="sideAvatar">CF</span><span class="profile-copy"><strong id="sideName">Campus User</strong><small id="sideRole">Student</small></span><button id="logoutButton" class="logout-button" type="button" title="Sign out" aria-label="Sign out">↪</button></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar"><div class="crumb">Campus services <span>/</span> <strong>FixDesk</strong></div><div class="topbar-right"><span class="environment-pill"><span class="api-dot" id="apiDot"></span><span id="apiText">Checking server</span></span><span class="user-chip" id="topAvatar">CF</span></div></header>
+      <div class="page-wrap">
+        <section class="hero" id="dashboard"><div class="hero-copy"><div class="eyebrow"><span></span><span id="heroEyebrow">CAMPUS SUPPORT HUB</span></div><h1 id="heroTitle">Make campus<br><em>work better.</em></h1><p id="heroDescription">Report a problem, track its progress, and help keep labs and learning spaces running smoothly.</p><a class="hero-link" id="heroAction" href="#newComplaint">Report a campus issue <span>↗</span></a></div><div class="hero-art" aria-hidden="true"><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-card"><span class="art-card-tag">CAMPUS CARE</span><div class="art-check">✓</div><strong>Issue spotted.<br>Action started.</strong><span class="art-lines"></span></div><span class="art-float float-one">Report <b>!</b></span><span class="art-float float-two">Resolved <b>✓</b></span></div><div class="hero-decoration">FIX IT FORWARD <span>·</span> ONE TICKET AT A TIME</div></section>
+
+        <section class="stats-grid" aria-label="Complaint statistics"><article class="stat-card"><div class="stat-head"><span id="statLabelAll">My complaints</span><span class="stat-icon icon-violet">▤</span></div><strong id="statAll">—</strong><small>Registered tickets</small></article><article class="stat-card"><div class="stat-head"><span>Needs attention</span><span class="stat-icon icon-amber">!</span></div><strong id="statOpen">—</strong><small>Submitted or under review</small></article><article class="stat-card"><div class="stat-head"><span>In progress</span><span class="stat-icon icon-blue">↻</span></div><strong id="statProgress">—</strong><small>Being worked on</small></article><article class="stat-card"><div class="stat-head"><span>Resolved</span><span class="stat-icon icon-green">✓</span></div><strong id="statResolved">—</strong><small>Issues marked fixed</small></article></section>
+
+        <section class="panel report-panel" id="newComplaint"><div class="panel-heading"><div><div class="section-kicker">NEW REQUEST <span>01</span></div><h2>Report a campus issue</h2><p>Share enough detail so the right team can help.</p></div><span class="panel-mark">＋</span></div><div class="server-note"><span class="note-icon">✓</span><p><strong>Server-checked submission</strong><br>Express validates every field before a complaint is saved.</p></div>
+          <form id="ticketForm" novalidate enctype="multipart/form-data"><div class="field-grid">
+            <div class="field"><label for="category">Issue category <b>*</b></label><select id="category" name="category"><option value="">Choose category</option><option>IT &amp; Wi-Fi</option><option>Lab Equipment</option><option>Classroom</option><option>Electrical</option><option>Plumbing</option><option>Cleaning</option><option>Other</option></select><small class="field-error" data-error="category"></small></div>
+            <div class="field"><label for="priority">Priority <b>*</b></label><select id="priority" name="priority"><option>Low</option><option selected>Normal</option><option>High</option><option>Urgent</option></select><small class="field-error" data-error="priority"></small></div>
+            <div class="field full"><label for="location">Building / room / area <b>*</b></label><div class="location-row"><input id="location" name="location" maxlength="100" placeholder="e.g. B Block, Computer Lab 2"><button id="geoButton" class="geo-button" type="button"><span>⌖</span> Use my location</button></div><small class="field-error" data-error="location"></small><small class="field-hint" id="geoHint">Geolocation is optional and only accessed after you press the button.</small><input type="hidden" id="latitude" name="latitude"><input type="hidden" id="longitude" name="longitude"><small class="field-error" data-error="coordinates"></small></div>
+            <div class="field full"><label for="subject">Issue title <b>*</b></label><input id="subject" name="subject" maxlength="100" placeholder="Summarise the issue in a few words"><small class="field-error" data-error="subject"></small></div>
+            <div class="field full"><div class="label-row"><label for="description">Description <b>*</b></label><span id="descriptionCount">0 / 1200</span></div><textarea id="description" name="description" maxlength="1200" rows="4" placeholder="What happened? When did you notice it? What is affected?"></textarea><small class="field-hint">20–1,200 characters. Do not include passwords or private information.</small><small class="field-error" data-error="description"></small></div>
+            <div class="field full"><label for="photo">Attach a photo <span class="optional-label">OPTIONAL</span></label><div class="upload-box" id="uploadBox"><span class="upload-icon">▧</span><div><strong>Choose an issue photo</strong><small>JPG, PNG or WEBP · Maximum 3 MB</small></div><input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp"></div><small class="field-hint">Avoid photos showing faces, ID cards, or private information.</small><small class="field-error" data-error="photo"></small><div id="photoPreview" class="photo-preview" hidden></div></div>
+          </div><div class="form-bottom"><span><b>*</b> Required fields</span><button class="submit-button" id="submitButton" type="submit">Register complaint <span>↗</span></button></div></form>
+        </section>
+
+        <section class="panel tickets-panel" id="complaints"><div class="panel-heading tickets-heading"><div><div class="section-kicker" id="ticketListKicker">TRACK YOUR REQUESTS <span>02</span></div><h2 id="ticketListTitle">My complaints</h2><p id="ticketListDescription">Follow status changes, evidence and staff replies.</p></div><button class="refresh-button" id="refreshButton" type="button" aria-label="Refresh complaints" title="Refresh complaints">↻</button></div>
+          <div class="ticket-tools"><label class="search-input"><span>⌕</span><input id="searchInput" type="search" maxlength="100" placeholder="Search reference, location, title…" aria-label="Search complaints"></label><div class="filter-grid"><label><span>Status</span><select id="statusFilter"><option>All</option><option>Submitted</option><option>Under Review</option><option>In Progress</option><option>Resolved</option><option>Rejected</option></select></label><label><span>Priority</span><select id="priorityFilter"><option>All</option><option>Low</option><option>Normal</option><option>High</option><option>Urgent</option></select></label></div></div>
+          <div class="ticket-list" id="ticketList" aria-live="polite"><div class="loading-state"><span class="loading-spinner"></span>Loading complaints…</div></div><div class="ticket-footer"><span id="resultCount">Loading records</span><span class="server-label"><span class="api-dot"></span> Server data</span></div>
+        </section>
+        <footer class="page-footer"><span>Campus FixDesk <b>·</b> ExpressJS Practical 5</span><span>Built for better campus spaces</span></footer>
+      </div>
+    </main>
+  </div>
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

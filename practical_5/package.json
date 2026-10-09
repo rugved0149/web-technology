@@ -1,0 +1,16 @@
+{
+  "name": "campus-fixdesk",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Role-based campus complaint management app demonstrating ExpressJS server-side validation",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "dev": "node --watch server.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "helmet": "^8.1.0",
+    "multer": "^2.0.2"
+  }
+}

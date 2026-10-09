@@ -1,0 +1,10 @@
+node_modules/
+.env
+.DS_Store
+npm-debug.log*
+# Local complaint/account records must not be committed.
+data/*.json
+!data/.gitkeep
+# Uploaded files are runtime data.
+uploads/*
+!uploads/.gitkeep
