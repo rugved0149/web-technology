@@ -31,6 +31,10 @@ jobs:
           mkdir public
           cp -r practical_1 public/
           cp -r practical_2 public/
+          npm --prefix practical_3/clinic-ease ci
+          npm --prefix practical_3/clinic-ease run build
+          mkdir -p public/practical_3
+          cp -r practical_3/clinic-ease/dist/. public/practical_3/
 
       - name: Create index
         run: |
@@ -145,6 +149,12 @@ jobs:
                           <strong>Practical 2</strong>
                           EventVault
                           <span>JavaScript · DOM · JSON</span>
+                      </a>
+
+                      <a href="practical_3/">
+                          <strong>Practical 3</strong>
+                          ClinicEase
+                          <span>ReactJS · Form Validation · Interactive Booking</span>
                       </a>
 
                       <a class="node"
