@@ -32,7 +32,7 @@ jobs:
           cp -r practical_1 public/
           cp -r practical_2 public/
           npm --prefix practical_3/clinic-ease ci
-          npm --prefix practical_3/clinic-ease run build
+          npm --prefix practical_3/clinic-ease run build -- --base=/web-technology/practical_3/
           mkdir -p public/practical_3
           cp -r practical_3/clinic-ease/dist/. public/practical_3/
 
