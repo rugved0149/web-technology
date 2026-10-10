@@ -49,145 +49,60 @@ jobs:
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>Web Technology Practicals</title>
-
               <style>
-                  * {
-                      box-sizing: border-box;
-                  }
-
+                  * { box-sizing: border-box; }
                   body {
-                      margin: 0;
-                      min-height: 100vh;
-                      display: grid;
-                      place-items: center;
-                      font-family: Arial, sans-serif;
-                      background: #f5f5f2;
-                      color: #17191c;
+                      margin: 0; min-height: 100vh; display: grid; place-items: center;
+                      font-family: Arial, sans-serif; background: #f5f5f2; color: #17191c;
                   }
-
-                  main {
-                      width: min(1200px, 92%);
-                      text-align: center;
-                  }
-
-                  h1 {
-                      font-size: 3rem;
-                      margin-bottom: 10px;
-                  }
-
-                  p {
-                      color: #70747a;
-                      font-size: 1.1rem;
-                  }
-
+                  main { width: min(1200px, 92%); text-align: center; padding: 32px 0; }
+                  h1 { font-size: 3rem; margin-bottom: 10px; }
+                  p { color: #70747a; font-size: 1.1rem; }
                   .grid {
-                      display: grid;
-                      grid-template-columns: repeat(3, minmax(0, 1fr));
-                      gap: 20px;
-                      margin-top: 40px;
+                      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+                      gap: 20px; margin-top: 40px;
                   }
-
                   a {
-                      display: block;
-                      padding: 35px;
-                      border: 1px solid #ddd;
-                      border-radius: 15px;
-                      background: white;
-                      color: inherit;
-                      text-decoration: none;
-                      transition: 0.2s;
+                      display: block; padding: 30px; border: 1px solid #ddd; border-radius: 15px;
+                      background: white; color: inherit; text-decoration: none; transition: 0.2s;
                   }
-
-                  a:hover {
-                      transform: translateY(-5px);
-                      box-shadow: 0 15px 35px rgba(0,0,0,.08);
-                  }
-
-                  strong {
-                      display: block;
-                      font-size: 1.25rem;
-                      margin-bottom: 8px;
-                  }
-
-                  span {
-                      display: block;
-                      margin-top: 8px;
-                      color: #70747a;
-                      font-size: 0.95rem;
-                  }
-
-                  .grid a {
-                      min-height: 165px;
-                      display: flex;
-                      flex-direction: column;
-                      justify-content: center;
-                      align-items: center;
-                  }
-
-                  .grid a span {
-                      line-height: 1.5;
-                  }
-
-                  @media (max-width: 900px) {
-                      .grid {
-                          grid-template-columns: repeat(2, minmax(0, 1fr));
-                      }
-                  }
-
-                  @media (max-width: 600px) {
-                      .grid {
-                          grid-template-columns: 1fr;
-                      }
-
-
-                      h1 {
-                          font-size: 2.2rem;
-                      }
-                  }
+                  a:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,.08); }
+                  strong { display: block; font-size: 1.2rem; margin-bottom: 8px; }
+                  span { display: block; margin-top: 8px; color: #70747a; font-size: 0.95rem; line-height: 1.5; }
+                  .grid a { min-height: 165px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+                  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+                  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 2.2rem; } }
               </style>
           </head>
-
           <body>
               <main>
                   <h1>Web Technology</h1>
                   <p>Practical Projects</p>
-
                   <div class="grid">
-
                       <a href="practical_1/study_spot/">
-                          <strong>Practical 1</strong>
-                          StudySpot
+                          <strong>Practical 1</strong>StudySpot
                           <span>HTML · CSS · Bootstrap</span>
                       </a>
-
                       <a href="practical_2/event_vault/">
-                          <strong>Practical 2</strong>
-                          EventVault
+                          <strong>Practical 2</strong>EventVault
                           <span>JavaScript · DOM · JSON</span>
                       </a>
-
                       <a href="practical_3/">
-                          <strong>Practical 3</strong>
-                          ClinicEase
+                          <strong>Practical 3</strong>ClinicEase
                           <span>ReactJS · Form Validation · Interactive Booking</span>
                       </a>
-
-                      <a href="https://web-technology-gfjk.onrender.com/"
-                         target="_blank"
-                         rel="noopener noreferrer">
-                          <strong>Practical 4</strong>
-                          CampusPass
+                      <a href="https://web-technology-gfjk.onrender.com/" target="_blank" rel="noopener noreferrer">
+                          <strong>Practical 4</strong>CampusPass
                           <span>Node.js · Express · Server-side Validation</span>
                       </a>
-
-                      <a href="https://web-technology-1-ikh7.onrender.com/"
-                         target="_blank"
-                         rel="noopener noreferrer">
-                          <strong>Practical 5</strong>
-                          Campus FixDesk
+                      <a href="https://web-technology-1-ikh7.onrender.com/" target="_blank" rel="noopener noreferrer">
+                          <strong>Practical 5</strong>Campus FixDesk
                           <span>ExpressJS · Student &amp; Admin · Complaint Tracking</span>
                       </a>
-
+                      <a href="https://clubsphere-web.onrender.com/" target="_blank" rel="noopener noreferrer">
+                          <strong>Mini Project</strong>ClubSphere
+                          <span>React · Express · MongoDB · Club Applications · Event Approvals</span>
+                      </a>
                   </div>
               </main>
           </body>
