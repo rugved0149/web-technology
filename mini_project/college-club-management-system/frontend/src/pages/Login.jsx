@@ -7,6 +7,7 @@ const Login = () => {
   const { login } = useAuth();
 
   const [formData, setFormData] = useState({
+    loginType: "student",
     email: "",
     password: "",
   });
@@ -49,18 +50,42 @@ const Login = () => {
                 </p>
 
                 {error && (
-                  <div className="alert alert-danger">
+                  <div className="alert alert-danger" role="alert">
                     {error}
                   </div>
                 )}
 
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
-                    <label className="form-label">Email</label>
+                    <label className="form-label" htmlFor="login-type">
+                      Sign in as
+                    </label>
+                    <select
+                      id="login-type"
+                      name="loginType"
+                      className="form-select"
+                      value={formData.loginType}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="student">Student</option>
+                      <option value="club">Club / Coordinator</option>
+                      <option value="admin">Administrator</option>
+                    </select>
+                    <div className="form-text">
+                      Choose the role assigned to your account. This selection
+                      does not change your account permissions.
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label" htmlFor="login-email">Email</label>
                     <input
+                      id="login-email"
                       type="email"
                       name="email"
                       className="form-control"
+                      autoComplete="username"
                       value={formData.email}
                       onChange={handleChange}
                       required
@@ -68,11 +93,13 @@ const Login = () => {
                   </div>
 
                   <div className="mb-4">
-                    <label className="form-label">Password</label>
+                    <label className="form-label" htmlFor="login-password">Password</label>
                     <input
+                      id="login-password"
                       type="password"
                       name="password"
                       className="form-control"
+                      autoComplete="current-password"
                       value={formData.password}
                       onChange={handleChange}
                       required
