@@ -1,12 +1,16 @@
+const mongoose = require("mongoose");
 const Announcement = require("../models/Announcement");
 const Club = require("../models/Club");
+const { findManagedClub } = require("../utils/clubAccess");
 
 const getAnnouncements = async (req, res) => {
   try {
+    const activeClubs = await Club.find({ status: "active" }).select("_id");
     const announcements = await Announcement.find({
       status: "published",
+      $or: [{ club: null }, { club: { $in: activeClubs.map((club) => club._id) } }, { club: { $exists: false } }],
     })
-      .populate("club", "name category")
+      .populate("club", "name category status")
       .populate("createdBy", "name email")
       .sort({ createdAt: -1 });
 
@@ -25,11 +29,11 @@ const getAnnouncements = async (req, res) => {
 
 const getAnnouncementById = async (req, res) => {
   try {
-    const announcement = await Announcement.findById(req.params.id)
-      .populate("club", "name category")
+    const announcement = await Announcement.findOne({ _id: req.params.id, status: "published" })
+      .populate("club", "name category status")
       .populate("createdBy", "name email");
 
-    if (!announcement) {
+    if (!announcement || (announcement.club && announcement.club.status !== "active")) {
       return res.status(404).json({
         success: false,
         message: "Announcement not found",
@@ -65,14 +69,20 @@ const createAnnouncement = async (req, res) => {
       });
     }
 
+    if (!club && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Coordinators must publish announcements for an assigned club" });
+    }
     if (club) {
+      if (!mongoose.isValidObjectId(club)) {
+        return res.status(400).json({ success: false, message: "Invalid club ID" });
+      }
       const clubExists = await Club.findById(club);
 
-      if (!clubExists) {
-        return res.status(404).json({
-          success: false,
-          message: "Club not found",
-        });
+      if (!clubExists || clubExists.status !== "active") {
+        return res.status(404).json({ success: false, message: "An active, approved club is required for announcements" });
+      }
+      if (req.user.role !== "admin" && !(await findManagedClub(req.user, clubExists._id))) {
+        return res.status(403).json({ success: false, message: "You can only publish announcements for your assigned clubs" });
       }
     }
 
@@ -114,6 +124,14 @@ const updateAnnouncement = async (req, res) => {
         message: "Announcement not found",
       });
     }
+    if (req.user.role !== "admin") {
+      if (!announcement.club || !(await findManagedClub(req.user, announcement.club))) {
+        return res.status(403).json({ success: false, message: "You can only update announcements for your assigned clubs" });
+      }
+      if (!(await Club.exists({ _id: announcement.club, status: "active" }))) {
+        return res.status(409).json({ success: false, message: "Announcements for inactive clubs cannot be edited" });
+      }
+    }
 
     const {
       title,
@@ -124,18 +142,24 @@ const updateAnnouncement = async (req, res) => {
     } = req.body;
 
     if (club !== undefined && club !== null) {
+      if (!mongoose.isValidObjectId(club)) {
+        return res.status(400).json({ success: false, message: "Invalid club ID" });
+      }
       const clubExists = await Club.findById(club);
 
-      if (!clubExists) {
-        return res.status(404).json({
-          success: false,
-          message: "Club not found",
-        });
+      if (!clubExists || clubExists.status !== "active") {
+        return res.status(404).json({ success: false, message: "An active, approved club is required for announcements" });
+      }
+      if (req.user.role !== "admin" && !(await findManagedClub(req.user, clubExists._id))) {
+        return res.status(403).json({ success: false, message: "You can only associate announcements with your assigned clubs" });
       }
 
       announcement.club = club;
     }
 
+    if (club === null && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Only an administrator can make a campus-wide announcement" });
+    }
     if (club === null) announcement.club = null;
     if (title !== undefined) announcement.title = title;
     if (content !== undefined) announcement.content = content;

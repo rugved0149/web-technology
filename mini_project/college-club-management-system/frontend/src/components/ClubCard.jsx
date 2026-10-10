@@ -9,16 +9,14 @@ const ClubCard = ({ club }) => {
             {club.category}
           </span>
 
-          <span className="badge bg-success-subtle text-success">
-            {club.status}
-          </span>
+          <span className="badge bg-success-subtle text-success">Approved</span>
         </div>
 
         <h4 className="fw-bold mb-2">{club.name}</h4>
 
-        <p className="text-muted mb-4">
-          {club.description}
-        </p>
+        <p className="small text-primary fw-semibold mb-2">{club.department || "Other department"}</p>
+        <p className="text-muted mb-4">{club.description}</p>
+        {club.keyMembers?.length > 0 && <p className="small text-muted mb-3">{club.keyMembers.length} listed key {club.keyMembers.length === 1 ? "member" : "members"}</p>}
 
         <Link
           to={`/clubs/${club._id}`}

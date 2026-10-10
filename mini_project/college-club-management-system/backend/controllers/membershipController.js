@@ -1,5 +1,7 @@
 const Membership = require("../models/Membership");
 const Club = require("../models/Club");
+const mongoose = require("mongoose");
+const { findManagedClub } = require("../utils/clubAccess");
 
 const requestMembership = async (req, res) => {
   try {
@@ -10,6 +12,10 @@ const requestMembership = async (req, res) => {
         success: false,
         message: "Club ID is required",
       });
+    }
+
+    if (!mongoose.isValidObjectId(clubId)) {
+      return res.status(400).json({ success: false, message: "Invalid club ID" });
     }
 
     const club = await Club.findById(clubId);
@@ -26,19 +32,18 @@ const requestMembership = async (req, res) => {
       club: clubId,
     });
 
+    let membership;
     if (existingMembership) {
-      return res.status(409).json({
-        success: false,
-        message: "Membership request already exists",
-        status: existingMembership.status,
-      });
+      if (!["rejected", "left"].includes(existingMembership.status)) {
+        return res.status(409).json({ success: false, message: "Membership request already exists", status: existingMembership.status });
+      }
+      existingMembership.status = "pending";
+      existingMembership.requestedAt = new Date();
+      existingMembership.joinedAt = null;
+      membership = await existingMembership.save();
+    } else {
+      membership = await Membership.create({ student: req.user.id, club: clubId, status: "pending" });
     }
-
-    const membership = await Membership.create({
-      student: req.user.id,
-      club: clubId,
-      status: "pending",
-    });
 
     res.status(201).json({
       success: true,
@@ -46,6 +51,9 @@ const requestMembership = async (req, res) => {
       membership,
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ success: false, message: "Membership request already exists" });
+    }
     console.error("Membership request error:", error);
 
     res.status(500).json({
@@ -78,6 +86,18 @@ const getMyMemberships = async (req, res) => {
 
 const getClubMemberships = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.clubId)) {
+      return res.status(400).json({ success: false, message: "Invalid club ID" });
+    }
+
+    const requestedClub = await Club.findById(req.params.clubId);
+    if (!requestedClub) {
+      return res.status(404).json({ success: false, message: "Club not found" });
+    }
+    if (req.user.role !== "admin" && !(await findManagedClub(req.user, requestedClub._id))) {
+      return res.status(403).json({ success: false, message: "You can only manage memberships for your assigned clubs" });
+    }
+
     const memberships = await Membership.find({
       club: req.params.clubId,
     })
@@ -111,6 +131,10 @@ const updateMembershipStatus = async (req, res) => {
       });
     }
 
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: "Invalid membership ID" });
+    }
+
     const membership = await Membership.findById(req.params.id);
 
     if (!membership) {
@@ -118,6 +142,10 @@ const updateMembershipStatus = async (req, res) => {
         success: false,
         message: "Membership not found",
       });
+    }
+
+    if (req.user.role !== "admin" && !(await findManagedClub(req.user, membership.club))) {
+      return res.status(403).json({ success: false, message: "You can only update memberships for your assigned clubs" });
     }
 
     membership.status = status;

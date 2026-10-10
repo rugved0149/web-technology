@@ -12,6 +12,7 @@ const Register = () => {
     password: "",
     department: "",
     year: "",
+    accountType: "student",
   });
 
   const [error, setError] = useState("");
@@ -32,12 +33,20 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await register(formData);
-      setSuccess("Registration successful. Redirecting to login...");
+      const data = await register(formData);
+
+      sessionStorage.setItem(
+        "verification_email",
+        data.email || formData.email
+      );
+
+      setSuccess(
+        "Registration successful. A verification code has been sent to your email."
+      );
 
       setTimeout(() => {
-        navigate("/login");
-      }, 1200);
+        navigate("/verify-email");
+      }, 1000);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -71,11 +80,22 @@ const Register = () => {
 
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
+                    <label className="form-label" htmlFor="account-type">Account type</label>
+                    <select id="account-type" name="accountType" className="form-select" value={formData.accountType} onChange={handleChange}>
+                      <option value="student">Student — join clubs and register for events</option>
+                      <option value="club_manager">Club representative — apply to manage a club</option>
+                    </select>
+                    <div className="form-text">Club representative accounts must submit a club application and wait for administrator approval before publishing events.</div>
+                  </div>
+                  <div className="mb-3">
                     <label className="form-label">Full Name</label>
                     <input
                       type="text"
                       name="name"
                       className="form-control"
+                      minLength="2"
+                      maxLength="80"
+                      autoComplete="name"
                       value={formData.name}
                       onChange={handleChange}
                       required
@@ -88,6 +108,7 @@ const Register = () => {
                       type="email"
                       name="email"
                       className="form-control"
+                      autoComplete="email"
                       value={formData.email}
                       onChange={handleChange}
                       required
@@ -102,7 +123,9 @@ const Register = () => {
                       className="form-control"
                       value={formData.password}
                       onChange={handleChange}
-                      minLength="6"
+                      minLength="8"
+                      maxLength="128"
+                      autoComplete="new-password"
                       required
                     />
                   </div>
@@ -136,7 +159,9 @@ const Register = () => {
                     className="btn btn-primary w-100"
                     disabled={loading}
                   >
-                    {loading ? "Creating account..." : "Create Account"}
+                    {loading
+                      ? "Sending verification code..."
+                      : "Create Account"}
                   </button>
                 </form>
 

@@ -50,6 +50,13 @@ const eventSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    locationUrl: { type: String, trim: true, maxlength: 1000, default: "" },
+    organiserName: { type: String, trim: true, maxlength: 100, default: "" },
+    organiserEmail: { type: String, trim: true, lowercase: true, maxlength: 254, default: "" },
+    organiserPhone: { type: String, trim: true, maxlength: 40, default: "" },
+    approvalStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "approved", index: true },
+    approvalNote: { type: String, trim: true, maxlength: 1000, default: "" },
+    attendanceCode: { type: String, select: false, default: "" },
     status: {
       type: String,
       enum: [

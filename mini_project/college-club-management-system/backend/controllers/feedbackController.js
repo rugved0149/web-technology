@@ -1,22 +1,33 @@
+const mongoose = require("mongoose");
 const Feedback = require("../models/Feedback");
 const Event = require("../models/Event");
 const Registration = require("../models/Registration");
+const { findManagedClub } = require("../utils/clubAccess");
+const { getEventDateTime } = require("../utils/eventTime");
 
 const createFeedback = async (req, res) => {
   try {
     const { eventId, rating, comment } = req.body;
 
-    if (!eventId || rating === undefined || !comment) {
+    if (!eventId || rating === undefined || typeof comment !== "string" || !comment.trim()) {
       return res.status(400).json({
         success: false,
         message: "Event ID, rating and comment are required",
       });
     }
 
+    if (!mongoose.isValidObjectId(eventId)) {
+      return res.status(400).json({ success: false, message: "Invalid event ID" });
+    }
+
+    if (comment.trim().length > 2000) {
+      return res.status(400).json({ success: false, message: "Feedback comment must be 2,000 characters or fewer" });
+    }
+
     const numericRating = Number(rating);
 
     if (
-      Number.isNaN(numericRating) ||
+      !Number.isInteger(numericRating) ||
       numericRating < 1 ||
       numericRating > 5
     ) {
@@ -35,7 +46,7 @@ const createFeedback = async (req, res) => {
       });
     }
 
-    if (new Date() < event.date) {
+    if (new Date() < getEventDateTime(event)) {
       return res.status(400).json({
         success: false,
         message: "Feedback can only be submitted after the event",
@@ -84,6 +95,9 @@ const createFeedback = async (req, res) => {
       feedback: populatedFeedback,
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ success: false, message: "Feedback has already been submitted for this event" });
+    }
     res.status(500).json({
       success: false,
       message: "Failed to submit feedback",
@@ -114,6 +128,14 @@ const getMyFeedback = async (req, res) => {
 
 const getEventFeedback = async (req, res) => {
   try {
+    const event = await Event.findById(req.params.eventId);
+    if (!event) {
+      return res.status(404).json({ success: false, message: "Event not found" });
+    }
+    if (req.user.role !== "admin" && !(await findManagedClub(req.user, event.club))) {
+      return res.status(403).json({ success: false, message: "You can only view feedback for your assigned clubs" });
+    }
+
     const feedback = await Feedback.find({
       event: req.params.eventId,
     })
@@ -154,7 +176,7 @@ const updateFeedback = async (req, res) => {
       const numericRating = Number(rating);
 
       if (
-        Number.isNaN(numericRating) ||
+        !Number.isInteger(numericRating) ||
         numericRating < 1 ||
         numericRating > 5
       ) {
@@ -168,10 +190,10 @@ const updateFeedback = async (req, res) => {
     }
 
     if (comment !== undefined) {
-      if (!comment.trim()) {
+      if (typeof comment !== "string" || !comment.trim() || comment.trim().length > 2000) {
         return res.status(400).json({
           success: false,
-          message: "Comment cannot be empty",
+          message: "Comment must contain 1–2,000 characters",
         });
       }
 

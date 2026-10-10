@@ -3,10 +3,14 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   getEventById,
   getMyRegistrations,
+  getMyFeedback,
+  submitEventFeedback,
+  updateEventFeedback,
   registerForEvent,
   cancelRegistration,
 } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { downloadEventCalendar, getEventStart } from "../utils/calendar";
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -15,6 +19,10 @@ const EventDetails = () => {
 
   const [event, setEvent] = useState(null);
   const [registration, setRegistration] = useState(null);
+  const [feedback, setFeedback] = useState(null);
+  const [feedbackRating, setFeedbackRating] = useState("5");
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
   const [cancelling, setCancelling] = useState(false);
@@ -28,20 +36,38 @@ const EventDetails = () => {
         setError("");
 
         const data = await getEventById(id);
-        setEvent(data.event);
+        const loadedEvent = data.event;
+        setEvent(loadedEvent);
+        setRegistration(null);
+        setFeedback(null);
+        setFeedbackRating("5");
+        setFeedbackComment("");
 
         if (isAuthenticated && user?.role === "student") {
           try {
             const registrationData = await getMyRegistrations(token);
-
-            const currentRegistration =
-              registrationData.registrations.find(
-                (item) => item.event?._id === id
-              );
-
+            const currentRegistration = registrationData.registrations.find(
+              (item) => item.event?._id === id
+            );
             setRegistration(currentRegistration || null);
           } catch {
             setRegistration(null);
+          }
+
+          if (getEventStart(loadedEvent) <= new Date()) {
+            try {
+              const feedbackData = await getMyFeedback(token);
+              const currentFeedback = (feedbackData.feedback || []).find(
+                (item) => item.event?._id === id
+              );
+              if (currentFeedback) {
+                setFeedback(currentFeedback);
+                setFeedbackRating(String(currentFeedback.rating));
+                setFeedbackComment(currentFeedback.comment || "");
+              }
+            } catch {
+              setFeedback(null);
+            }
           }
         }
       } catch (error) {
@@ -105,6 +131,28 @@ const EventDetails = () => {
     }
   };
 
+
+  const handleFeedbackSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      setSubmittingFeedback(true);
+      setError("");
+      setMessage("");
+      const payload = { rating: Number(feedbackRating), comment: feedbackComment.trim() };
+      const data = feedback
+        ? await updateEventFeedback(token, feedback._id, payload)
+        : await submitEventFeedback(token, { eventId: id, ...payload });
+      setFeedback(data.feedback);
+      setFeedbackRating(String(data.feedback.rating));
+      setFeedbackComment(data.feedback.comment || "");
+      setMessage(data.message || "Your feedback has been saved.");
+    } catch (feedbackError) {
+      setError(feedbackError.message);
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container py-5 text-center">
@@ -148,15 +196,16 @@ const EventDetails = () => {
     );
   }
 
-  const eventDate = new Date(event.date);
+  const eventDate = getEventStart(event);
   const deadline = new Date(event.registrationDeadline);
 
-  const isRegistered =
-    registration?.status === "registered";
+  const isRegistered = registration?.status === "registered";
+  const isWaitlisted = registration?.status === "waitlisted";
+  const hasActiveRegistration = isRegistered || isWaitlisted;
 
   const canRegister =
     event.status === "registration_open" &&
-    !isRegistered &&
+    !hasActiveRegistration &&
     new Date() < deadline &&
     new Date() < eventDate;
 
@@ -187,14 +236,12 @@ const EventDetails = () => {
             </div>
 
             <div className="d-flex align-items-start">
-              {isRegistered ? (
+              {hasActiveRegistration ? (
                 <div className="d-flex flex-column gap-2">
-                  <button
-                    className="btn btn-outline-success btn-lg"
-                    disabled
-                  >
-                    Registered
+                  <button className={`btn ${isWaitlisted ? "btn-outline-warning" : "btn-outline-success"} btn-lg`} disabled>
+                    {isWaitlisted ? "On waitlist" : "Registered"}
                   </button>
+                  {isWaitlisted && <small className="text-muted">You will be promoted automatically if a place opens.</small>}
 
                   <button
                     className="btn btn-outline-danger"
@@ -248,9 +295,14 @@ const EventDetails = () => {
             <div className="col-md-7">
               <div className="card border-0 shadow-sm h-100">
                 <div className="card-body p-4">
-                  <h5 className="fw-bold mb-4">
-                    Event Information
-                  </h5>
+                  <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                    <h5 className="fw-bold mb-0">Event Information</h5>
+                    <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => {
+                      try { downloadEventCalendar(event); } catch (calendarError) { setError(calendarError.message); }
+                    }}>
+                      Add to calendar (.ics)
+                    </button>
+                  </div>
 
                   <div className="row g-3">
                     <div className="col-sm-6">
@@ -281,13 +333,13 @@ const EventDetails = () => {
                     </div>
 
                     <div className="col-sm-6">
-                      <div className="text-muted small">
-                        Capacity
-                      </div>
-                      <div className="fw-semibold">
-                        {event.capacity}
-                      </div>
+                      <div className="text-muted small">Capacity</div>
+                      <div className="fw-semibold">{event.capacity}</div>
                     </div>
+                    {event.locationUrl && <div className="col-sm-6">
+                      <div className="text-muted small">Venue directions</div>
+                      <a className="fw-semibold" href={event.locationUrl} target="_blank" rel="noreferrer">Open map / location ↗</a>
+                    </div>}
 
                     <div className="col-sm-6">
                       <div className="text-muted small">
@@ -320,23 +372,59 @@ const EventDetails = () => {
 
                   {event.club ? (
                     <>
-                      <h4 className="fw-bold">
-                        {event.club.name}
-                      </h4>
-
-                      <p className="text-muted mb-0">
-                        {event.club.category}
-                      </p>
+                      <h4 className="fw-bold">{event.club.name}</h4>
+                      <p className="text-muted">{event.club.category}{event.club.department ? ` · ${event.club.department}` : ""}</p>
+                      {event.club.contactEmail && <p className="mb-2"><strong>Club contact:</strong> <a href={`mailto:${event.club.contactEmail}`}>{event.club.contactEmail}</a></p>}
+                      {event.club.contactPhone && <p className="mb-2"><strong>Phone:</strong> <a href={`tel:${event.club.contactPhone}`}>{event.club.contactPhone}</a></p>}
+                      <Link className="btn btn-sm btn-outline-primary mt-2" to={`/clubs/${event.club._id}`}>View club profile</Link>
                     </>
-                  ) : (
-                    <p className="text-muted mb-0">
-                      Club information unavailable.
-                    </p>
-                  )}
+                  ) : <p className="text-muted mb-0">Club information unavailable.</p>}
+                  <hr className="my-4" />
+                  <h5 className="fw-bold mb-3">Event organiser</h5>
+                  <div className="fw-semibold">{event.organiserName || event.createdBy?.name || "Club organiser"}</div>
+                  {(event.organiserEmail || event.createdBy?.email) && <div><a href={`mailto:${event.organiserEmail || event.createdBy?.email}`}>{event.organiserEmail || event.createdBy?.email}</a></div>}
+                  {event.organiserPhone && <div><a href={`tel:${event.organiserPhone}`}>{event.organiserPhone}</a></div>}
                 </div>
               </div>
             </div>
           </div>
+
+          {isAuthenticated && user?.role === "student" && registration?.status === "registered" && eventDate <= new Date() && (
+            <div className="card border-0 shadow-sm mt-4">
+              <div className="card-body p-4 p-lg-5">
+                <div className="d-flex flex-column flex-md-row justify-content-between gap-2 mb-4">
+                  <div>
+                    <span className="text-uppercase small fw-bold text-primary">Your experience</span>
+                    <h4 className="fw-bold mb-1">Event feedback</h4>
+                    <p className="text-muted mb-0">Tell the organizers what worked and what could be better.</p>
+                  </div>
+                  {feedback && <span className="badge text-bg-success align-self-md-start">Review submitted</span>}
+                </div>
+                <form onSubmit={handleFeedbackSubmit}>
+                  <div className="row g-3">
+                    <div className="col-md-4">
+                      <label className="form-label fw-semibold" htmlFor="feedback-rating">Your rating</label>
+                      <select id="feedback-rating" className="form-select" value={feedbackRating} onChange={(event) => setFeedbackRating(event.target.value)} required>
+                        <option value="5">5 — Excellent</option>
+                        <option value="4">4 — Very good</option>
+                        <option value="3">3 — Good</option>
+                        <option value="2">2 — Needs improvement</option>
+                        <option value="1">1 — Poor</option>
+                      </select>
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label fw-semibold" htmlFor="feedback-comment">Comments</label>
+                      <textarea id="feedback-comment" className="form-control" rows="4" maxLength={2000} value={feedbackComment} onChange={(event) => setFeedbackComment(event.target.value)} placeholder="Share what you liked and what could be improved…" required />
+                      <div className="form-text">{feedbackComment.length}/2,000 characters</div>
+                    </div>
+                  </div>
+                  <button type="submit" className="btn btn-primary mt-3" disabled={submittingFeedback || !feedbackComment.trim()}>
+                    {submittingFeedback ? "Saving feedback…" : feedback ? "Update feedback" : "Submit feedback"}
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </div>

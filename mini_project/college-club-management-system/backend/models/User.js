@@ -15,17 +15,21 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
     password: {
       type: String,
       required: true,
-      minlength: 6,
+      minlength: 8,
     },
 
     role: {
       type: String,
       enum: [
         "student",
+        "club_manager",
         "club_coordinator",
         "faculty_coordinator",
         "admin",

@@ -39,14 +39,35 @@ const Clubs = () => {
     return clubs.filter((club) => {
       const matchesSearch =
         club.name.toLowerCase().includes(search.toLowerCase()) ||
-        club.description.toLowerCase().includes(search.toLowerCase());
+        club.description.toLowerCase().includes(search.toLowerCase()) ||
+        (club.department || "Other").toLowerCase().includes(search.toLowerCase());
 
       const matchesCategory =
         category === "All" || club.category === category;
 
       return matchesSearch && matchesCategory;
+    }).sort((a, b) => {
+      const departmentA = (a.department || "Other").trim() || "Other";
+      const departmentB = (b.department || "Other").trim() || "Other";
+      if (departmentA === "Other" && departmentB !== "Other") return 1;
+      if (departmentB === "Other" && departmentA !== "Other") return -1;
+      return departmentA.localeCompare(departmentB) || a.name.localeCompare(b.name);
     });
   }, [clubs, search, category]);
+
+  const groupedClubs = useMemo(() => {
+    const groups = new Map();
+    filteredClubs.forEach((club) => {
+      const key = (club.department || "").trim() || "Other";
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(club);
+    });
+    return [...groups.entries()].sort(([a], [b]) => {
+      if (a === "Other" && b !== "Other") return 1;
+      if (b === "Other" && a !== "Other") return -1;
+      return a.localeCompare(b);
+    });
+  }, [filteredClubs]);
 
   return (
     <div>
@@ -113,11 +134,15 @@ const Clubs = () => {
           )}
 
           {!loading && !error && filteredClubs.length > 0 && (
-            <div className="row g-4">
-              {filteredClubs.map((club) => (
-                <div className="col-md-6 col-lg-4" key={club._id}>
-                  <ClubCard club={club} />
-                </div>
+            <div className="d-flex flex-column gap-5">
+              {groupedClubs.map(([department, items]) => (
+                <section key={department} aria-label={`${department} clubs`}>
+                  <div className="d-flex align-items-center justify-content-between gap-3 border-bottom pb-2 mb-4">
+                    <div><span className="text-uppercase small fw-bold text-primary">Department</span><h2 className="h4 fw-bold mb-0">{department === "Other" ? "Other clubs" : department}</h2></div>
+                    <span className="badge text-bg-light">{items.length} {items.length === 1 ? "club" : "clubs"}</span>
+                  </div>
+                  <div className="row g-4">{items.map((club) => <div className="col-md-6 col-lg-4" key={club._id}><ClubCard club={club} /></div>)}</div>
+                </section>
               ))}
             </div>
           )}

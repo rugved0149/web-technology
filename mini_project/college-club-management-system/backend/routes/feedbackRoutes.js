@@ -10,6 +10,8 @@ const {
 
 const { protect, authorize } = require("../middleware/authMiddleware");
 
+const validateObjectId = require("../middleware/validateObjectId");
+
 const router = express.Router();
 
 router.post(
@@ -28,13 +30,15 @@ router.get(
 
 router.get(
   "/event/:eventId",
+  validateObjectId("eventId"),
   protect,
-  authorize("admin", "club_coordinator", "faculty_coordinator"),
+  authorize("admin", "club_manager", "club_coordinator", "faculty_coordinator"),
   getEventFeedback
 );
 
 router.put(
   "/:id",
+  validateObjectId("id"),
   protect,
   authorize("student"),
   updateFeedback
@@ -42,6 +46,7 @@ router.put(
 
 router.delete(
   "/:id",
+  validateObjectId("id"),
   protect,
   authorize("admin"),
   deleteFeedback

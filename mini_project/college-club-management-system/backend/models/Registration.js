@@ -14,13 +14,11 @@ const registrationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["registered", "cancelled"],
+      enum: ["registered", "waitlisted", "cancelled"],
       default: "registered",
     },
-    registeredAt: {
-      type: Date,
-      default: Date.now,
-    },
+    registeredAt: { type: Date, default: Date.now },
+    checkedInAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

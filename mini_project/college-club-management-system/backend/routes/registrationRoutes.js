@@ -1,42 +1,12 @@
 const express = require("express");
-
-const {
-  registerForEvent,
-  getMyRegistrations,
-  getEventRegistrations,
-  cancelRegistration,
-} = require("../controllers/registrationController");
-
+const { registerForEvent, getMyRegistrations, getEventRegistrations, cancelRegistration, checkInWithCode, updateAttendance } = require("../controllers/registrationController");
 const { protect, authorize } = require("../middleware/authMiddleware");
-
+const validateObjectId = require("../middleware/validateObjectId");
 const router = express.Router();
-
-router.post(
-  "/",
-  protect,
-  authorize("student"),
-  registerForEvent
-);
-
-router.get(
-  "/my",
-  protect,
-  authorize("student"),
-  getMyRegistrations
-);
-
-router.get(
-  "/event/:eventId",
-  protect,
-  authorize("admin", "club_coordinator", "faculty_coordinator"),
-  getEventRegistrations
-);
-
-router.put(
-  "/:id/cancel",
-  protect,
-  authorize("student"),
-  cancelRegistration
-);
-
+router.post("/", protect, authorize("student"), registerForEvent);
+router.post("/check-in", protect, authorize("student"), checkInWithCode);
+router.get("/my", protect, authorize("student"), getMyRegistrations);
+router.get("/event/:eventId", validateObjectId("eventId"), protect, authorize("admin", "club_manager", "club_coordinator", "faculty_coordinator"), getEventRegistrations);
+router.put("/:id/attendance", validateObjectId("id"), protect, authorize("admin", "club_manager", "club_coordinator", "faculty_coordinator"), updateAttendance);
+router.put("/:id/cancel", validateObjectId("id"), protect, authorize("student"), cancelRegistration);
 module.exports = router;

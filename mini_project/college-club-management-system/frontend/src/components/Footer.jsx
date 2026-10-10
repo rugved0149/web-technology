@@ -1,58 +1,35 @@
-import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-function Navbar() {
+function Footer() {
   return (
-    <nav className="navbar navbar-expand-lg bg-white border-bottom sticky-top">
-      <div className="container py-2">
-        <NavLink className="navbar-brand fw-bold fs-4" to="/">
-          ClubSphere
-        </NavLink>
-
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#mainNav"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-
-        <div className="collapse navbar-collapse" id="mainNav">
-          <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/">
-                Home
-              </NavLink>
-            </li>
-
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/clubs">
-                Clubs
-              </NavLink>
-            </li>
-
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/events">
-                Events
-              </NavLink>
-            </li>
-
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/about">
-                About
-              </NavLink>
-            </li>
-
-            <li className="nav-item ms-lg-2">
-              <NavLink className="btn btn-dark px-4" to="/login">
-                Login
-              </NavLink>
-            </li>
-          </ul>
+    <footer className="site-footer mt-auto">
+      <div className="container py-4 py-lg-5">
+        <div className="row g-4 align-items-start">
+          <div className="col-lg-6">
+            <Link to="/" className="footer-brand">ClubSphere</Link>
+            <p className="footer-copy mt-2 mb-0">
+              One place to discover campus communities, manage memberships and take part in events.
+            </p>
+          </div>
+          <div className="col-6 col-lg-3">
+            <h2 className="footer-heading">Explore</h2>
+            <Link to="/clubs">Clubs</Link>
+            <Link to="/events">Events</Link>
+            <Link to="/announcements">Announcements</Link>
+          </div>
+          <div className="col-6 col-lg-3">
+            <h2 className="footer-heading">Your account</h2>
+            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/about">About ClubSphere</Link>
+          </div>
+        </div>
+        <div className="footer-bottom mt-4 pt-3">
+          <span>© {new Date().getFullYear()} ClubSphere</span>
+          <span>Built for a more connected campus.</span>
         </div>
       </div>
-    </nav>
+    </footer>
   );
 }
 
-export default Navbar;
+export default Footer;
