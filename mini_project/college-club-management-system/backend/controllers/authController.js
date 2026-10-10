@@ -6,6 +6,7 @@ const EmailVerification = require("../models/EmailVerification");
 const PasswordReset = require("../models/PasswordReset");
 const { createPasswordResetToken, hashPasswordResetToken } = require("../utils/passwordResetTokens");
 const { sendVerificationEmail, sendPasswordResetEmail, isEmailConfigured } = require("../utils/emailService");
+const { isRoleAllowedForLoginType } = require("../utils/loginRoles");
 
 const generateToken = (user) => {
   return jwt.sign(
@@ -416,13 +417,7 @@ const login = async (req, res) => {
       });
     }
 
-    const allowedRolesByLoginType = {
-      student: ["student"],
-      club: ["club_manager", "club_coordinator", "faculty_coordinator"],
-      admin: ["admin"],
-    };
-
-    if (!allowedRolesByLoginType[loginType].includes(user.role)) {
+    if (!isRoleAllowedForLoginType(loginType, user.role)) {
       const messageByLoginType = {
         student: "This account is not a student account. Select Club or Administrator if that matches your assigned role.",
         club: "This account is not a club or coordinator account. Select Student or Administrator if that matches your assigned role.",
