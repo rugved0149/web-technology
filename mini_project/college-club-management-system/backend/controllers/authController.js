@@ -374,12 +374,19 @@ const resetPassword = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, loginType } = req.body;
 
     if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password) {
       return res.status(400).json({
         success: false,
         message: "Email and password are required",
+      });
+    }
+
+    if (!["student", "club", "admin"].includes(loginType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Choose Student, Club, or Administrator before signing in.",
       });
     }
 
@@ -394,11 +401,7 @@ const login = async (req, res) => {
       });
     }
 
-    const passwordMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
-
+    const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({
         success: false,
@@ -410,6 +413,25 @@ const login = async (req, res) => {
       return res.status(403).json({
         success: false,
         message: "Please verify your email before logging in.",
+      });
+    }
+
+    const allowedRolesByLoginType = {
+      student: ["student"],
+      club: ["club_manager", "club_coordinator", "faculty_coordinator"],
+      admin: ["admin"],
+    };
+
+    if (!allowedRolesByLoginType[loginType].includes(user.role)) {
+      const messageByLoginType = {
+        student: "This account is not a student account. Select Club or Administrator if that matches your assigned role.",
+        club: "This account is not a club or coordinator account. Select Student or Administrator if that matches your assigned role.",
+        admin: "This account does not have administrator privileges. Choose the role assigned to your account.",
+      };
+
+      return res.status(403).json({
+        success: false,
+        message: messageByLoginType[loginType],
       });
     }
 
