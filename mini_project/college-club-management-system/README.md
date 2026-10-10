@@ -37,7 +37,7 @@ ClubSphere is a responsive campus community platform built with React + Vite, Ex
 
 - Node.js 22.12+ (required by the current Vite toolchain)
 - MongoDB local instance or MongoDB Atlas
-- Gmail account with a Google App Password for email verification and password recovery
+- An email sender for verification and password recovery
 
 ## Local setup on Windows (CMD)
 
@@ -85,6 +85,21 @@ npm run dev
 
 Vite usually serves the app at `http://localhost:5173`.
 
+## Hosted email configuration (Render Free)
+
+Render Free web services block outbound SMTP ports `25`, `465`, and `587`. Use the HTTPS email API integration rather than Gmail SMTP for the hosted application. See Render's [free web service limitations](https://render.com/docs/free).
+
+This project supports Brevo's transactional email API. In Brevo, create an API key and add/verify a sender address first. Brevo requires the sender used in API requests to be registered and verified; see its [transactional email API documentation](https://developers.brevo.com/docs/send-a-transactional-email).
+
+Set these variables in the Render backend service's Environment settings:
+
+- `EMAIL_PROVIDER=brevo`
+- `BREVO_API_KEY` = your private Brevo API key
+- `EMAIL_FROM` = the verified sender address in Brevo
+- `EMAIL_FROM_NAME=ClubSphere`
+
+Do not store these values in GitHub or paste the API key into public issue threads. `EMAIL_USER` and `EMAIL_APP_PASSWORD` remain useful for local development when `EMAIL_PROVIDER=smtp`.
+
 ## Attendance and QR notes
 
 The attendance workspace provides a QR check-in link and a CSV export of registrations, waitlist entries and attendance. Only authenticated students with an active event registration can check in; the API enforces the check-in window. The current QR image is rendered through an external QR-image service; for production use, replace it with a locally generated QR code to remove that external dependency.
@@ -99,6 +114,6 @@ Backend: `npm run dev`, `npm start`, `npm test`, `npm run make-admin -- user@exa
 
 ## Deployment notes
 
-Set `VITE_API_BASE_URL` in the frontend hosting environment to the deployed backend URL ending in `/api`. Set `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL`, `EMAIL_USER` and `EMAIL_APP_PASSWORD` in the backend environment. Use `CLIENT_URLS` as a comma-separated list of additional allowed frontend origins. Do not commit `.env` files, database credentials, email app passwords or generated attendance URLs.
+Set `VITE_API_BASE_URL` in the frontend hosting environment to the deployed backend URL ending in `/api`. Set `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL`, `CLIENT_URLS`, and the email API variables in the backend environment. Do not commit `.env` files, database credentials, email API keys, app passwords, or generated attendance URLs.
 
 The frontend retains the existing localStorage bearer-token flow. Treat it as a known security trade-off and do not inject untrusted HTML. The scheduled deletion process runs at backend startup and hourly while the server is running; due clubs and their related events, registrations, feedback, memberships and announcements are purged at that time.
