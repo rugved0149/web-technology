@@ -1,28 +1,29 @@
 # Practical 6: RESTful API with CRUD Operations
 
 ## Objective
-Build and deploy a RESTful API using Node.js, Express.js and PostgreSQL. Verify the endpoints using Postman locally and after deployment.
+Build and deploy a RESTful API using Node.js and Express.js. Verify CRUD endpoints using Postman locally and through a public hosting URL.
 
 ## Technology
-- Node.js and Express.js for HTTP routes
-- PostgreSQL for persistent database storage
-- `pg` for parameterized SQL queries
-- Postman for API testing
-- Render for hosting the API and database
+- Node.js 22.5+ and Express.js
+- SQLite database by default using Node's built-in `node:sqlite` module
+- Optional PostgreSQL support through `pg` and `DATABASE_URL`
+- Postman for testing
+- Render for hosting
 
 ## Record structure
-Each record contains `name` (required, 2–100 characters), `email` (valid email, required) and `course` (required, up to 100 characters). PostgreSQL automatically assigns an ID and stores creation/update timestamps.
+Each record contains `name` (required, 2–100 characters), `email` (valid email, required) and `course` (required, up to 100 characters). The database generates an ID and records creation/update timestamps. The records table is created automatically at startup.
 
 ## Run locally
-1. Install Node.js 20 or later and create a PostgreSQL database.
+1. Install Node.js 22.5 or later.
 2. Open a terminal in `practical_6` and run:
 
 ```bash
 npm install
+npm start
 ```
 
-3. Copy `.env.example` to `.env` and replace `DATABASE_URL` with the PostgreSQL connection string. For a local database, it may look like `postgresql://username:password@localhost:5432/webtech_crud`. Do not commit `.env`.
-4. Start the API using `npm start`. Visit `http://localhost:3000/` or `http://localhost:3000/health`. The records table is created automatically when the server starts.
+3. By default, the API stores data in `practical_6/records.sqlite`. To use PostgreSQL instead, copy `.env.example` to `.env` and set `DATABASE_URL` to a valid PostgreSQL connection URL.
+4. Visit `http://localhost:3000/` or `http://localhost:3000/health`.
 
 ## API endpoints
 
@@ -46,19 +47,16 @@ Example JSON for POST and PUT (Postman Body → raw → JSON):
 ```
 
 ## Test using Postman
-Import `postman/CRUD-API.postman_collection.json`. The `baseUrl` variable defaults to `http://localhost:3000`. Run **Create record** first; its test saves the generated ID as `recordId`. Then run list, get-by-ID, update, delete, and verify-deleted-record requests. A validation request checks missing fields return `400`.
+Import `postman/CRUD-API.postman_collection.json`. The `baseUrl` variable defaults to `http://localhost:3000`. Run **Create record** first; its test saves the generated ID as `recordId`. Then run list, get-by-ID, update, delete, and verify-deleted-record requests. A validation request checks that missing fields return `400`.
 
-## Deploy on Render
-A Render PostgreSQL database was provisioned for this practical. The associated API Web Service is configured from this repository using:
-- Repository: `rugved0149/web-technology`
-- Branch: `main`
+## Render deployment
+The API Web Service is configured on Render:
+- Public URL: `https://webtech-practical6-api.onrender.com`
+- Repository: `rugved0149/web-technology`, branch `main`
 - Build command: `cd practical_6 && npm install`
 - Start command: `cd practical_6 && npm start`
-- Database environment variable: `DATABASE_URL`, linked to the Render PostgreSQL service
 
-After Render finishes deploying, open the service URL ending in `.onrender.com`, then check `/health`. In Postman, set the collection variable `baseUrl` to that exact public URL and repeat the CRUD requests against the public API.
-
-**Database lifecycle:** this database was created on Render's free plan and is scheduled to expire on 25 November 2026. Export any needed submissions/data before expiry, or upgrade/recreate the database to keep it beyond that date.
+The current service is configured to use the SQLite fallback. **Important:** Render's free service filesystem is ephemeral, so records may be lost after a restart or redeploy. For persistent cloud storage, configure `DATABASE_URL` in the Render service with a valid PostgreSQL connection string; the code automatically uses PostgreSQL whenever the value starts with `postgres://` or `postgresql://`.
 
 ## Response codes
 - `200`: read/update/delete succeeded
@@ -66,12 +64,13 @@ After Render finishes deploying, open the service URL ending in `.onrender.com`,
 - `400`: invalid ID, invalid JSON or field validation failure
 - `404`: record or route not found
 - `500`: unexpected server error
-- `503`: API cannot reach its database during the health check
+- `503`: database health check failed
 
 ## Submission evidence
-- [ ] Local `GET /health` reports `database: connected`
-- [ ] Postman screenshots of all CRUD success responses locally
-- [ ] Public Render URL and health check
-- [ ] Postman screenshots of all CRUD responses against the deployed URL
+- [ ] Check the public `/health` URL and confirm the database reports connected
+- [ ] Run the Postman collection locally, if required
+- [ ] In Postman, set the collection variable `baseUrl` to `https://webtech-practical6-api.onrender.com`
+- [ ] Capture successful responses for CREATE, READ, UPDATE and DELETE from the public URL
+- [ ] Capture the validation failure response
 
-The Postman collection includes request assertions, and the API implements CRUD operations. Save actual Postman screenshots after running the collection; do not describe requests as tested unless their responses have been observed.
+The code and Postman collection are in the repository. Save screenshots after running the requests so the report contains observed test results rather than assumed results.
