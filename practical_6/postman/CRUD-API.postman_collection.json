@@ -1,0 +1,22 @@
+{
+  "info": {
+    "_postman_id": "cc6d18f4-7a63-4ee4-9c48-2f0d8ca716d5",
+    "name": "Practical 6 - RESTful CRUD API",
+    "description": "Test locally or on Render. Create record saves its ID for later requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "recordId", "value": "" }
+  ],
+  "item": [
+    { "name": "Health check", "request": { "method": "GET", "url": "{{baseUrl}}/health" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Health returns 200', function () { pm.response.to.have.status(200); });", "pm.test('Service status is ok', function () { pm.expect(pm.response.json().status).to.eql('ok'); });"] } }] },
+    { "name": "List records", "request": { "method": "GET", "url": "{{baseUrl}}/api/records" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('List returns 200', function () { pm.response.to.have.status(200); });", "pm.test('Response includes data array', function () { pm.expect(pm.response.json().data).to.be.an('array'); });"] } }] },
+    { "name": "Create record", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Aarav Patil\",\n  \"email\": \"aarav@example.com\",\n  \"course\": \"Software Engineering\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/records" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Create returns 201', function () { pm.response.to.have.status(201); });", "const json = pm.response.json();", "pm.test('Created record has ID', function () { pm.expect(json.data._id).to.be.a('string'); });", "if (json.data && json.data._id) pm.collectionVariables.set('recordId', json.data._id);"] } }] },
+    { "name": "Get record by ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/records/{{recordId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Get by ID returns 200', function () { pm.response.to.have.status(200); });", "pm.test('ID matches saved ID', function () { pm.expect(pm.response.json().data._id).to.eql(pm.collectionVariables.get('recordId')); });"] } }] },
+    { "name": "Update record", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Aarav Patil Updated\",\n  \"email\": \"aarav.updated@example.com\",\n  \"course\": \"Web Technology\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/records/{{recordId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Update returns 200', function () { pm.response.to.have.status(200); });", "pm.test('Record was updated', function () { pm.expect(pm.response.json().data.course).to.eql('Web Technology'); });"] } }] },
+    { "name": "Delete record", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/records/{{recordId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Delete returns 200', function () { pm.response.to.have.status(200); });", "pm.test('Deleted ID matches saved ID', function () { pm.expect(pm.response.json().data._id).to.eql(pm.collectionVariables.get('recordId')); });"] } }] },
+    { "name": "Verify deleted record returns 404", "request": { "method": "GET", "url": "{{baseUrl}}/api/records/{{recordId}}" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Deleted record returns 404', function () { pm.response.to.have.status(404); });"] } }] },
+    { "name": "Validation - missing required fields", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"A\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/records" }, "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Invalid record returns 400', function () { pm.response.to.have.status(400); });"] } }] }
+  ]
+}
