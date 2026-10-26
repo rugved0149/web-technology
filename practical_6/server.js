@@ -1,20 +1,20 @@
 require("dotenv").config();
 
 const express = require("express");
+const path = require("path");
+const { DatabaseSync } = require("node:sqlite");
 const { Pool } = require("pg");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL is missing. Configure it in .env or the hosting environment.");
-  process.exit(1);
-}
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.PGSSLMODE === "disable" ? false : { rejectUnauthorized: false }
-});
+const usePostgres = /^postgres(ql)?:\/\//i.test(process.env.DATABASE_URL || "");
+const pool = usePostgres
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.PGSSLMODE === "disable" ? false : { rejectUnauthorized: false }
+    })
+  : null;
+const sqlite = usePostgres ? null : new DatabaseSync(path.join(__dirname, "records.sqlite"));
 
 app.use(express.json({ limit: "100kb" }));
 
@@ -53,9 +53,21 @@ function validateRecord(body, partial = false) {
   return errors;
 }
 
+async function query(sql, params = []) {
+  if (usePostgres) return pool.query(sql, params);
+  const statement = sqlite.prepare(sql.replace(/\$(\d+)/g, "?$1"));
+  if (/\bSELECT\b|\bRETURNING\b/i.test(sql)) {
+    const rows = statement.all(...params);
+    return { rows, rowCount: rows.length };
+  }
+  const result = statement.run(...params);
+  return { rows: [], rowCount: Number(result.changes) };
+}
+
 app.get("/", (req, res) => {
   res.json({
     message: "Web Technology Practical 6 — RESTful Records API",
+    database: usePostgres ? "PostgreSQL" : "SQLite",
     endpoints: {
       list: "GET /api/records",
       create: "POST /api/records",
@@ -69,8 +81,8 @@ app.get("/", (req, res) => {
 
 app.get("/health", async (req, res) => {
   try {
-    await pool.query("SELECT 1");
-    res.json({ status: "ok", database: "connected" });
+    await query("SELECT 1");
+    res.json({ status: "ok", database: usePostgres ? "connected (PostgreSQL)" : "connected (SQLite)" });
   } catch (error) {
     console.error("Health check failed:", error.message);
     res.status(503).json({ status: "error", database: "disconnected" });
@@ -79,7 +91,7 @@ app.get("/health", async (req, res) => {
 
 app.get("/api/records", async (req, res, next) => {
   try {
-    const result = await pool.query("SELECT id, name, email, course, created_at, updated_at FROM records ORDER BY created_at DESC");
+    const result = await query("SELECT id, name, email, course, created_at, updated_at FROM records ORDER BY created_at DESC");
     res.json({ count: result.rowCount, data: result.rows });
   } catch (error) { next(error); }
 });
@@ -90,7 +102,7 @@ app.post("/api/records", async (req, res, next) => {
 
   try {
     const values = [req.body.name.trim(), req.body.email.trim().toLowerCase(), req.body.course.trim()];
-    const result = await pool.query(
+    const result = await query(
       "INSERT INTO records (name, email, course) VALUES ($1, $2, $3) RETURNING id, name, email, course, created_at, updated_at",
       values
     );
@@ -102,7 +114,7 @@ app.get("/api/records/:id", async (req, res, next) => {
   if (!validId(req.params.id)) return res.status(400).json({ error: "Invalid record ID" });
 
   try {
-    const result = await pool.query(
+    const result = await query(
       "SELECT id, name, email, course, created_at, updated_at FROM records WHERE id = $1",
       [Number(req.params.id)]
     );
@@ -129,7 +141,7 @@ app.put("/api/records/:id", async (req, res, next) => {
       return key + " = $" + values.length;
     });
     values.push(Number(req.params.id));
-    const result = await pool.query(
+    const result = await query(
       "UPDATE records SET " + assignments.join(", ") + ", updated_at = CURRENT_TIMESTAMP WHERE id = $" + values.length +
       " RETURNING id, name, email, course, created_at, updated_at",
       values
@@ -143,7 +155,7 @@ app.delete("/api/records/:id", async (req, res, next) => {
   if (!validId(req.params.id)) return res.status(400).json({ error: "Invalid record ID" });
 
   try {
-    const result = await pool.query(
+    const result = await query(
       "DELETE FROM records WHERE id = $1 RETURNING id, name, email, course, created_at, updated_at",
       [Number(req.params.id)]
     );
@@ -164,10 +176,14 @@ app.use((error, req, res, next) => {
 
 async function start() {
   try {
-    await pool.query("CREATE TABLE IF NOT EXISTS records (id BIGSERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(254) NOT NULL, course VARCHAR(100) NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)");
-    app.listen(PORT, () => console.log("REST API listening on port " + PORT));
+    if (usePostgres) {
+      await query("CREATE TABLE IF NOT EXISTS records (id BIGSERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(254) NOT NULL, course VARCHAR(100) NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)");
+    } else {
+      sqlite.exec("CREATE TABLE IF NOT EXISTS records (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, email TEXT NOT NULL, course TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)");
+    }
+    app.listen(PORT, () => console.log("REST API listening on port " + PORT + " using " + (usePostgres ? "PostgreSQL" : "SQLite")));
   } catch (error) {
-    console.error("Could not initialize PostgreSQL:", error.message);
+    console.error("Could not initialize database:", error.message);
     process.exit(1);
   }
 }
@@ -175,6 +191,7 @@ async function start() {
 start();
 
 process.on("SIGTERM", async () => {
-  await pool.end();
+  if (pool) await pool.end();
+  if (sqlite) sqlite.close();
   process.exit(0);
 });
