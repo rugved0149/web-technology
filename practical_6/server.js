@@ -1,91 +1,180 @@
 require("dotenv").config();
 
 const express = require("express");
-const mongoose = require("mongoose");
+const { Pool } = require("pg");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ limit: "100kb" }));
+if (!process.env.DATABASE_URL) {
+  console.error("DATABASE_URL is missing. Configure it in .env or the hosting environment.");
+  process.exit(1);
+}
 
-const recordSchema = new mongoose.Schema({
-  name: { type: String, required: [true, "Name is required"], trim: true, minlength: [2, "Name must contain at least 2 characters"], maxlength: [100, "Name cannot exceed 100 characters"] },
-  email: { type: String, required: [true, "Email is required"], trim: true, lowercase: true, match: [/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/, "Enter a valid email address"] },
-  course: { type: String, required: [true, "Course is required"], trim: true, maxlength: [100, "Course cannot exceed 100 characters"] }
-}, { timestamps: true, versionKey: false });
-
-const Record = mongoose.model("Record", recordSchema);
-
-app.get("/", (req, res) => {
-  res.json({ message: "Web Technology Practical 6 — RESTful Records API", endpoints: { list: "GET /api/records", create: "POST /api/records", retrieve: "GET /api/records/:id", update: "PUT /api/records/:id", delete: "DELETE /api/records/:id", health: "GET /health" } });
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.PGSSLMODE === "disable" ? false : { rejectUnauthorized: false }
 });
 
-app.get("/health", (req, res) => {
-  res.json({ status: "ok", database: mongoose.connection.readyState === 1 ? "connected" : "disconnected" });
+app.use(express.json({ limit: "100kb" }));
+
+function validId(value) {
+  return /^\d+$/.test(value) && Number.isSafeInteger(Number(value)) && Number(value) > 0;
+}
+
+function validateRecord(body, partial = false) {
+  const errors = [];
+  const fields = ["name", "email", "course"];
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return ["Request body must be a JSON object"];
+  }
+
+  if (!partial) {
+    for (const field of fields) {
+      if (body[field] === undefined || body[field] === null || String(body[field]).trim() === "") {
+        errors.push(field + " is required");
+      }
+    }
+  }
+
+  if (body.name !== undefined && (typeof body.name !== "string" || body.name.trim().length < 2 || body.name.trim().length > 100)) {
+    errors.push("Name must be a string between 2 and 100 characters");
+  }
+  if (body.email !== undefined && (typeof body.email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email.trim()))) {
+    errors.push("Enter a valid email address");
+  }
+  if (body.course !== undefined && (typeof body.course !== "string" || body.course.trim().length < 1 || body.course.trim().length > 100)) {
+    errors.push("Course must be a string between 1 and 100 characters");
+  }
+
+  for (const field of Object.keys(body)) {
+    if (!fields.includes(field)) errors.push("Unsupported field: " + field);
+  }
+  return errors;
+}
+
+app.get("/", (req, res) => {
+  res.json({
+    message: "Web Technology Practical 6 — RESTful Records API",
+    endpoints: {
+      list: "GET /api/records",
+      create: "POST /api/records",
+      retrieve: "GET /api/records/:id",
+      update: "PUT /api/records/:id",
+      delete: "DELETE /api/records/:id",
+      health: "GET /health"
+    }
+  });
+});
+
+app.get("/health", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
+    res.json({ status: "ok", database: "connected" });
+  } catch (error) {
+    console.error("Health check failed:", error.message);
+    res.status(503).json({ status: "error", database: "disconnected" });
+  }
 });
 
 app.get("/api/records", async (req, res, next) => {
   try {
-    const records = await Record.find().sort({ createdAt: -1 });
-    res.json({ count: records.length, data: records });
+    const result = await pool.query("SELECT id, name, email, course, created_at, updated_at FROM records ORDER BY created_at DESC");
+    res.json({ count: result.rowCount, data: result.rows });
   } catch (error) { next(error); }
 });
 
 app.post("/api/records", async (req, res, next) => {
+  const errors = validateRecord(req.body);
+  if (errors.length) return res.status(400).json({ error: "Validation failed", details: errors });
+
   try {
-    const record = await Record.create(req.body);
-    res.status(201).json({ message: "Record created successfully", data: record });
+    const values = [req.body.name.trim(), req.body.email.trim().toLowerCase(), req.body.course.trim()];
+    const result = await pool.query(
+      "INSERT INTO records (name, email, course) VALUES ($1, $2, $3) RETURNING id, name, email, course, created_at, updated_at",
+      values
+    );
+    res.status(201).json({ message: "Record created successfully", data: result.rows[0] });
   } catch (error) { next(error); }
 });
 
 app.get("/api/records/:id", async (req, res, next) => {
+  if (!validId(req.params.id)) return res.status(400).json({ error: "Invalid record ID" });
+
   try {
-    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Invalid record ID" });
-    const record = await Record.findById(req.params.id);
-    if (!record) return res.status(404).json({ error: "Record not found" });
-    res.json({ data: record });
+    const result = await pool.query(
+      "SELECT id, name, email, course, created_at, updated_at FROM records WHERE id = $1",
+      [Number(req.params.id)]
+    );
+    if (!result.rowCount) return res.status(404).json({ error: "Record not found" });
+    res.json({ data: result.rows[0] });
   } catch (error) { next(error); }
 });
 
 app.put("/api/records/:id", async (req, res, next) => {
+  if (!validId(req.params.id)) return res.status(400).json({ error: "Invalid record ID" });
+  const errors = validateRecord(req.body, true);
+  if (errors.length) return res.status(400).json({ error: "Validation failed", details: errors });
+
+  const allowed = ["name", "email", "course"];
+  const entries = Object.entries(req.body).filter(([key]) => allowed.includes(key));
+  if (!entries.length) return res.status(400).json({ error: "Provide at least one field: name, email, course" });
+
   try {
-    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Invalid record ID" });
-    const allowedFields = ["name", "email", "course"];
-    const updates = Object.fromEntries(Object.entries(req.body).filter(([key]) => allowedFields.includes(key)));
-    if (Object.keys(updates).length === 0) return res.status(400).json({ error: "Provide at least one valid field: name, email, course" });
-    const record = await Record.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
-    if (!record) return res.status(404).json({ error: "Record not found" });
-    res.json({ message: "Record updated successfully", data: record });
+    const values = [];
+    const assignments = entries.map(([key, rawValue]) => {
+      let value = rawValue.trim();
+      if (key === "email") value = value.toLowerCase();
+      values.push(value);
+      return key + " = $" + values.length;
+    });
+    values.push(Number(req.params.id));
+    const result = await pool.query(
+      "UPDATE records SET " + assignments.join(", ") + ", updated_at = CURRENT_TIMESTAMP WHERE id = $" + values.length +
+      " RETURNING id, name, email, course, created_at, updated_at",
+      values
+    );
+    if (!result.rowCount) return res.status(404).json({ error: "Record not found" });
+    res.json({ message: "Record updated successfully", data: result.rows[0] });
   } catch (error) { next(error); }
 });
 
 app.delete("/api/records/:id", async (req, res, next) => {
+  if (!validId(req.params.id)) return res.status(400).json({ error: "Invalid record ID" });
+
   try {
-    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Invalid record ID" });
-    const record = await Record.findByIdAndDelete(req.params.id);
-    if (!record) return res.status(404).json({ error: "Record not found" });
-    res.json({ message: "Record deleted successfully", data: record });
+    const result = await pool.query(
+      "DELETE FROM records WHERE id = $1 RETURNING id, name, email, course, created_at, updated_at",
+      [Number(req.params.id)]
+    );
+    if (!result.rowCount) return res.status(404).json({ error: "Record not found" });
+    res.json({ message: "Record deleted successfully", data: result.rows[0] });
   } catch (error) { next(error); }
 });
 
 app.use((req, res) => res.status(404).json({ error: "Endpoint not found" }));
 
 app.use((error, req, res, next) => {
-  if (error instanceof mongoose.Error.ValidationError) return res.status(400).json({ error: "Validation failed", details: Object.values(error.errors).map(item => item.message) });
-  if (error.code === 11000) return res.status(409).json({ error: "A record with this unique value already exists" });
-  if (error instanceof SyntaxError && "body" in error) return res.status(400).json({ error: "Request body must be valid JSON" });
+  if (error instanceof SyntaxError && "body" in error) {
+    return res.status(400).json({ error: "Request body must be valid JSON" });
+  }
   console.error(error);
   res.status(500).json({ error: "Internal server error" });
 });
 
 async function start() {
-  const mongoUri = process.env.MONGODB_URI;
-  if (!mongoUri) { console.error("MONGODB_URI is missing. Create a .env file using .env.example."); process.exit(1); }
   try {
-    await mongoose.connect(mongoUri);
-    console.log("Connected to MongoDB");
-    app.listen(PORT, () => console.log(`REST API listening on port ${PORT}`));
-  } catch (error) { console.error("Could not connect to MongoDB:", error.message); process.exit(1); }
+    await pool.query("CREATE TABLE IF NOT EXISTS records (id BIGSERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(254) NOT NULL, course VARCHAR(100) NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP)");
+    app.listen(PORT, () => console.log("REST API listening on port " + PORT));
+  } catch (error) {
+    console.error("Could not initialize PostgreSQL:", error.message);
+    process.exit(1);
+  }
 }
 
 start();
+
+process.on("SIGTERM", async () => {
+  await pool.end();
+  process.exit(0);
+});
