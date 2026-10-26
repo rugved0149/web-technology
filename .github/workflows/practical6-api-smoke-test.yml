@@ -1,0 +1,72 @@
+name: Practical 6 API Smoke Test
+
+on:
+  push:
+    paths:
+      - "practical_6/**"
+      - ".github/workflows/practical6-api-smoke-test.yml"
+  workflow_dispatch:
+
+jobs:
+  test-public-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for public API health
+        env:
+          BASE_URL: https://webtech-practical6-api.onrender.com
+        run: |
+          for attempt in $(seq 1 24); do
+            if curl --silent --show-error --fail "$BASE_URL/health" -o /tmp/health.json; then
+              cat /tmp/health.json
+              exit 0
+            fi
+            echo "API not ready yet ($attempt/24)"
+            sleep 10
+          done
+          echo "Public health check failed"
+          exit 1
+
+      - name: Verify CRUD endpoints
+        env:
+          BASE_URL: https://webtech-practical6-api.onrender.com
+        run: |
+          set -euo pipefail
+
+          code=$(curl --silent --show-error -o /tmp/list.json -w "%{http_code}" "$BASE_URL/api/records")
+          test "$code" = "200"
+          jq -e '.data | type == "array"' /tmp/list.json
+
+          code=$(curl --silent --show-error -o /tmp/create.json -w "%{http_code}" \
+            -X POST "$BASE_URL/api/records" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"API Smoke Test","email":"smoke-test@example.com","course":"Web Technology"}')
+          test "$code" = "201"
+          id=$(jq -r '.data.id' /tmp/create.json)
+          test "$id" != "null"
+          echo "Created test record ID: $id"
+
+          code=$(curl --silent --show-error -o /tmp/get.json -w "%{http_code}" "$BASE_URL/api/records/$id")
+          test "$code" = "200"
+          jq -e '.data.name == "API Smoke Test"' /tmp/get.json
+
+          code=$(curl --silent --show-error -o /tmp/update.json -w "%{http_code}" \
+            -X PUT "$BASE_URL/api/records/$id" \
+            -H "Content-Type: application/json" \
+            -d '{"course":"Updated Web Technology"}')
+          test "$code" = "200"
+          jq -e '.data.course == "Updated Web Technology"' /tmp/update.json
+
+          code=$(curl --silent --show-error -o /tmp/delete.json -w "%{http_code}" \
+            -X DELETE "$BASE_URL/api/records/$id")
+          test "$code" = "200"
+
+          code=$(curl --silent --show-error -o /tmp/deleted.json -w "%{http_code}" "$BASE_URL/api/records/$id")
+          test "$code" = "404"
+
+          code=$(curl --silent --show-error -o /tmp/invalid.json -w "%{http_code}" \
+            -X POST "$BASE_URL/api/records" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"A"}')
+          test "$code" = "400"
+
+          echo "PASS: list, create, get-by-ID, update, delete, not-found, and validation endpoints"
