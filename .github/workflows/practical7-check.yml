@@ -1,0 +1,36 @@
+name: Practical 7 MongoDB app checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "practical_7/**"
+      - ".github/workflows/practical7-check.yml"
+  pull_request:
+    paths:
+      - "practical_7/**"
+      - ".github/workflows/practical7-check.yml"
+  workflow_dispatch:
+
+jobs:
+  syntax-and-artifact-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: practical_7
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Check JavaScript syntax
+        run: |
+          node --check server.js
+          node --check models/Student.js
+          node --check public/app.js
+      - name: Validate Postman collection JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('postman/Practical-7-MongoDB.postman_collection.json', 'utf8')); console.log('Postman collection JSON is valid')"
