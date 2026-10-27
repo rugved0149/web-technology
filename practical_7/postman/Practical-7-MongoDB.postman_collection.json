@@ -48,7 +48,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Rugved Suryawanshi\",\n  \"email\": \"rugved@example.com\",\n  \"course\": \"Software Engineering\",\n  \"year\": 2\n}",
+          "raw": "{\n  \"name\": \"Rugved Suryawanshi\",\n  \"email\": \"{{studentEmail}}\",\n  \"course\": \"Software Engineering\",\n  \"year\": 2\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -58,6 +58,15 @@
         "url": "{{baseUrl}}/api/students"
       },
       "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('studentEmail', 'rugved+practical7-' + Date.now() + '@example.com');"
+            ]
+          }
+        },
         {
           "listen": "test",
           "script": {
@@ -157,8 +166,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Student deleted', function () { pm.response.to.have.status(200); });",
-              "pm.collectionVariables.unset('studentId');"
+              "pm.test('Student deleted', function () { pm.response.to.have.status(200); });"
             ]
           }
         }
@@ -177,7 +185,8 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Deleted record is not found', function () { pm.response.to.have.status(404); });"
+              "pm.test('Deleted record is not found', function () { pm.response.to.have.status(404); });",
+              "pm.collectionVariables.unset('studentId');"
             ]
           }
         }
