@@ -93,15 +93,15 @@ Import `postman/Practical-7-MongoDB.postman_collection.json`. Set the collection
 
 ## 6. Deploy to Render
 
-1. Push this repository to GitHub.
-2. In Render, select **New → Web Service**, connect `rugved0149/web-technology`, and choose branch `main`.
-3. Set **Root Directory** to `practical_7`.
-4. Build command: `npm install`
-5. Start command: `npm start`
-6. Set environment variable `MONGODB_URI` to your MongoDB Atlas connection string. Do not set it to the example placeholder.
-7. Deploy and open the generated Render URL. Verify `/api/health` returns HTTP 200 and the browser UI can create a student.
+The repository now includes a root-level `render.yaml` Blueprint configured for a free Render web service rooted at `practical_7`.
 
-The application intentionally refuses to start if `MONGODB_URI` is missing. This avoids silently falling back to a temporary local database.
+1. Create a free Atlas cluster and have the real connection URI ready.
+2. Open https://dashboard.render.com/blueprint and connect the `rugved0149/web-technology` repository on branch `main`.
+3. Render reads `render.yaml`. Enter your real URI when prompted for `MONGODB_URI`; never enter the example placeholder.
+4. Review the service settings: Root Directory `practical_7`, Build command `npm install`, Start command `npm start`, health check `/api/health`, plan `free`, region `Singapore`.
+5. Deploy and open the generated Render URL. Verify `/api/health` returns HTTP 200 and the browser UI can create a student.
+
+Alternatively, create a Web Service manually with the same settings. Set `MONGODB_URI` as a secret environment variable, as described in Render's environment-variable documentation. The health check is intentionally dependent on a working MongoDB connection; do not consider deployment successful until `/api/health` returns HTTP 200.
 
 ## 7. Browser and Postman checklist
 
