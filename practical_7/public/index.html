@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Records | Practical 7</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">WEB TECHNOLOGY · PRACTICAL 07</p>
+      <h1>Student records</h1>
+      <p class="subtitle">A simple CRUD application powered by Node.js, Express and MongoDB.</p>
+      <div class="status"><span id="statusDot"></span><span id="statusText">Checking MongoDB connection…</span></div>
+    </header>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div><p class="eyebrow">RECORD MANAGEMENT</p><h2 id="formTitle">Add a student</h2></div>
+        <span class="count" id="recordCount">0 records</span>
+      </div>
+      <form id="studentForm">
+        <input type="hidden" id="studentId">
+        <div class="form-grid">
+          <label>Full name<input id="name" name="name" type="text" minlength="2" maxlength="100" required placeholder="e.g. Aditi Patil"></label>
+          <label>Email address<input id="email" name="email" type="email" maxlength="254" required placeholder="student@example.com"></label>
+          <label>Course<input id="course" name="course" type="text" minlength="2" maxlength="100" required placeholder="e.g. Software Engineering"></label>
+          <label>Year
+            <select id="year" name="year" required>
+              <option value="">Select year</option><option value="1">First year</option><option value="2">Second year</option><option value="3">Third year</option><option value="4">Fourth year</option><option value="5">Fifth year</option><option value="6">Sixth year</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-actions"><button class="primary" type="submit" id="saveButton">Save student</button><button type="button" class="secondary hidden" id="cancelEdit">Cancel edit</button></div>
+      </form>
+      <p id="message" class="message" role="status"></p>
+    </section>
+
+    <section class="records">
+      <div class="records-heading"><div><p class="eyebrow">DATABASE COLLECTION</p><h2>Students</h2></div><button class="secondary" id="refreshButton" type="button">Refresh</button></div>
+      <div id="recordList" class="record-list"><div class="empty">Loading student records…</div></div>
+    </section>
+    <footer>Practical 7 · MongoDB database · Mongoose data model</footer>
+  </main>
+  <script src="/app.js" defer></script>
+</body>
+</html>
