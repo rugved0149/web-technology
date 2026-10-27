@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: webtech-practical7-mongodb
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    autoDeploy: true
+    rootDir: practical_7
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
