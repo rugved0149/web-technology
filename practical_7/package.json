@@ -1,0 +1,21 @@
+{
+  "name": "practical-7-mongodb-crud",
+  "version": "1.0.0",
+  "description": "Web Technology Practical 7 - MongoDB CRUD app using Node.js, Express, and Mongoose",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.9.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
