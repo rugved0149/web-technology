@@ -177,9 +177,11 @@ app.get("*", (req, res) => {
 });
 
 async function start() {
+  app.listen(PORT, () => console.log("Practical 7 server listening on port " + PORT));
+
   if (!process.env.MONGODB_URI) {
     console.error("MONGODB_URI is missing. Configure it in .env or your hosting environment.");
-    process.exit(1);
+    return;
   }
 
   try {
@@ -187,10 +189,8 @@ async function start() {
       serverSelectionTimeoutMS: 10000
     });
     console.log("Connected to MongoDB database:", mongoose.connection.name);
-    app.listen(PORT, () => console.log("Practical 7 server listening on port " + PORT));
   } catch (error) {
     console.error("MongoDB connection failed:", error.message);
-    process.exit(1);
   }
 }
 
