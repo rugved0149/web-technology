@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Operating Systems Practicals | C++</title>
+<style>
+:root{color-scheme:dark;--bg:#000;--panel:#101010;--line:#292929;--text:#f5f5f5;--muted:#a3a3a3;--accent:#67e8f9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
+header{border-bottom:1px solid var(--line);background:#050505}.wrap{width:min(1120px,92%);margin:auto}header .wrap{padding:34px 0 28px}
+a{color:var(--accent)}.back{display:inline-block;margin-bottom:18px;text-decoration:none;color:var(--muted)}
+h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;margin:0 0 12px}.subtitle,.desc{color:var(--muted);margin:0}
+main{padding:30px 0 70px}.notice{border:1px solid var(--line);background:#0b0b0b;border-radius:12px;padding:16px 18px;color:#c9c9c9;margin-bottom:24px}
+.practical{border:1px solid var(--line);background:var(--panel);border-radius:14px;margin:18px 0;overflow:hidden}
+.practical-head{padding:18px 20px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+h2{font-size:1.2rem;margin:0 0 5px}.actions{display:flex;gap:12px;flex-wrap:wrap}
+.actions a{font-size:.9rem;text-decoration:none;border:1px solid #3b3b3b;border-radius:8px;padding:7px 11px}.actions a:hover{border-color:var(--accent)}
+pre{margin:0;background:#000;color:#e5e7eb;border-top:1px solid var(--line);padding:20px;overflow:auto;max-height:520px;font:13px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:4}
+footer{border-top:1px solid var(--line);padding:20px 0;color:var(--muted);font-size:.9rem}
+@media(max-width:600px){.practical-head{padding:16px}pre{padding:14px;font-size:12px}}
+</style></head>
+<body><header><div class="wrap"><a class="back" href="../">← Back to Web Technology landing page</a>
+<h1>Operating Systems Practicals</h1><p class="subtitle">Seven practical implementations in C++ · Linux / Ubuntu / WSL</p></div></header>
+<main class="wrap"><div class="notice"><strong>Build note:</strong> These programs use Linux/POSIX APIs where required. Compile and run them in Ubuntu or WSL. Each source listing is also available as a separate downloadable C++ file.</div><div id="list"></div></main>
+<footer><div class="wrap">Operating Systems · C++ implementations · MITAOE</div></footer>
+<script>
+const items=[
+["Practical 1 — Disk Space Usage","Display total, used and available filesystem space with usage percentage.","practical_1_disk_usage.cpp","g++ -std=c++17 practical_1_disk_usage.cpp -o practical1"],
+["Practical 2 — Process Creation and PIPE IPC","Create a child process with fork() and exchange data through an unnamed pipe.","practical_2_pipe_ipc.cpp","g++ -std=c++17 practical_2_pipe_ipc.cpp -o practical2"],
+["Practical 3 — CPU Scheduling","Compare FCFS, non-preemptive SJF and Round Robin scheduling.","practical_3_cpu_scheduling.cpp","g++ -std=c++17 practical_3_cpu_scheduling.cpp -o practical3"],
+["Practical 4 — Thread Synchronization","Producer-consumer example using POSIX semaphore, mutex and condition variables.","practical_4_thread_synchronization.cpp","g++ -std=c++17 practical_4_thread_synchronization.cpp -pthread -o practical4"],
+["Practical 5 — Banker's Algorithm","Check safe states before increasing or permanently decreasing available resources.","practical_5_bankers_algorithm.cpp","g++ -std=c++17 practical_5_bankers_algorithm.cpp -o practical5"],
+["Practical 6 — Virtual Memory","Simulate demand paging with FIFO, LRU and Optimal page replacement.","practical_6_virtual_memory.cpp","g++ -std=c++17 practical_6_virtual_memory.cpp -o practical6"],
+["Practical 7 — Simple File System","Implement file create, read, write and delete using simulated inodes and a block allocation table.","practical_7_simple_file_system.cpp","g++ -std=c++17 practical_7_simple_file_system.cpp -o practical7"]
+];
+const list=document.getElementById("list");
+for(const [title,desc,file,build] of items){
+ const section=document.createElement("section");section.className="practical";
+ const head=document.createElement("div");head.className="practical-head";
+ const info=document.createElement("div");const h=document.createElement("h2");h.textContent=title;
+ const p=document.createElement("p");p.className="desc";p.textContent=desc;info.append(h,p);
+ const actions=document.createElement("div");actions.className="actions";
+ const source=document.createElement("a");source.href=file;source.textContent="Download source";source.download=file;
+ const repo=document.createElement("a");repo.href="https://github.com/rugved0149/web-technology/blob/main/os_practicals/"+file;repo.target="_blank";repo.rel="noopener";repo.textContent="Open on GitHub";
+ actions.append(source,repo);head.append(info,actions);
+ const pre=document.createElement("pre");const code=document.createElement("code");code.textContent="Loading source…";pre.append(code);
+ section.append(head,pre);list.append(section);
+ fetch(file).then(r=>{if(!r.ok)throw Error("Unable to load source");return r.text()}).then(t=>code.textContent=t).catch(()=>code.textContent="Source preview unavailable. Use the Download source or Open on GitHub link.");
+}
+</script></body></html>
