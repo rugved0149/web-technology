@@ -28,6 +28,17 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Compile OS practicals
+        run: |
+          mkdir -p /tmp/os-practicals-build
+          g++ -std=c++17 os_practicals/practical_1_disk_usage.cpp -o /tmp/os-practicals-build/practical1
+          g++ -std=c++17 os_practicals/practical_2_pipe_ipc.cpp -o /tmp/os-practicals-build/practical2
+          g++ -std=c++17 os_practicals/practical_3_cpu_scheduling.cpp -o /tmp/os-practicals-build/practical3
+          g++ -std=c++17 os_practicals/practical_4_thread_synchronization.cpp -pthread -o /tmp/os-practicals-build/practical4
+          g++ -std=c++17 os_practicals/practical_5_bankers_algorithm.cpp -o /tmp/os-practicals-build/practical5
+          g++ -std=c++17 os_practicals/practical_6_virtual_memory.cpp -o /tmp/os-practicals-build/practical6
+          g++ -std=c++17 os_practicals/practical_7_simple_file_system.cpp -o /tmp/os-practicals-build/practical7
+
       - name: Prepare website
         run: |
           mkdir public
